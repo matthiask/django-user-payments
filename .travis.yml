@@ -1,0 +1,36 @@
+sudo: false
+# cache: pip
+language: python
+python:
+- "3.6"
+- "3.5"
+- "2.7"
+env:
+- REQ="Django>=1.11,<2.0"
+- REQ="Django>=2.0,<2.1"
+- REQ="https://github.com/django/django/archive/master.zip#egg=Django"
+matrix:
+  allow_failures:
+    - env: REQ="https://github.com/django/django/archive/master.zip#egg=Django"
+  exclude:
+    - python: "2.7"
+      env: REQ="Django>=2.0,<2.1"
+    - python: "2.7"
+      env: REQ="https://github.com/django/django/archive/master.zip#egg=Django"
+install:
+- pip install -U pip wheel
+- pip install Pillow
+- pip install $REQ
+- python setup.py install
+script: cd tests && ./manage.py test testapp && cd ..
+
+jobs:
+  include:
+    - stage: style
+      env: REQ=none
+      install: skip
+      script:
+        - pip install flake8 isort unify
+        - flake8 .
+        - isort --check-only --recursive --diff user_payments user_subscriptions tests
+        - unify --check-only --recursive --quote '"' user_payments user_subscriptions tests

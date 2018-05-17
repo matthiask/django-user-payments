@@ -1,0 +1,9 @@
+include LICENSE
+include MANIFEST.in
+include README.rst
+recursive-include user_payments/static *
+recursive-include user_payments/locale *
+recursive-include user_payments/templates *
+recursive-include user_subscriptions/static *
+recursive-include user_subscriptions/locale *
+recursive-include user_subscriptions/templates *
