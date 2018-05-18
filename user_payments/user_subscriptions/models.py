@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from django.apps import apps
 from django.conf import settings
@@ -138,7 +138,7 @@ class Subscription(models.Model):
             next_start = next(days)
             if this_start not in existing:
                 p, _created = self.periods.get_or_create(
-                    starts_at=this_start, ends_at=next_start
+                    starts_at=this_start, ends_at=next_start - timedelta(days=1)
                 )
                 periods.append(p)
             this_start = next_start
