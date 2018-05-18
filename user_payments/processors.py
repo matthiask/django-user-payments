@@ -65,11 +65,30 @@ def process_unbound_items(*, processors=default_processors):
         .select_related("stripe_customer")
     ):
         payment = Payment.objects.create_pending(user=user)
+        if not payment:
+            continue
+
+        logger.info(
+            "Processing: %(payment)s by %(email)s",
+            {"payment": payment, "email": payment.email},
+        )
 
         for processor in processors:
             # Success processing the payment?
             if processor(payment):
+                logger.info(
+                    "Success: %(payment)s by %(email)s with %(processor)s",
+                    {
+                        "payment": payment,
+                        "email": payment.email,
+                        "processor": processor.__name,
+                    },
+                )
                 break
         else:
 
+            logger.warning(
+                "Canceling: %(payment)s by %(email)s",
+                {"payment": payment, "email": payment.email},
+            )
             payment.cancel_pending()
