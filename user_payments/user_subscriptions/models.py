@@ -15,7 +15,7 @@ from .utils import recurring
 class SubscriptionManager(models.Manager):
 
     def create_periods(self):
-        for subscription in self.all():
+        for subscription in self.filter(renew_automatically=True):
             subscription.create_periods()
 
 
