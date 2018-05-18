@@ -32,5 +32,5 @@ jobs:
       script:
         - pip install flake8 isort unify
         - flake8 .
-        - isort --check-only --recursive --diff user_payments user_subscriptions tests
-        - unify --check-only --recursive --quote '"' user_payments user_subscriptions tests
+        - isort --check-only --recursive --diff user_payments tests
+        - unify --check-only --recursive --quote '"' user_payments tests

@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from user_subscriptions.models import Subscription, SubscriptionPeriod
+from user_payments.user_subscriptions.models import Subscription, SubscriptionPeriod
 
 
 class Command(BaseCommand):

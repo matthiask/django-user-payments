@@ -7,7 +7,7 @@ import stripe
 
 
 class StripeCustomersConfig(AppConfig):
-    name = "user.payments.stripe_customers"
+    name = "user_payments.stripe_customers"
     verbose_name = capfirst(_("stripe customers"))
 
     def ready(self):
