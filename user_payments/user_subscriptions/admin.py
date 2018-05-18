@@ -20,6 +20,11 @@ class SubscriptionAdmin(admin.ModelAdmin):
     raw_id_fields = ("user",)
     search_fields = ("title",)
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if not change:
+            obj.create_periods()
+
 
 @admin.register(models.SubscriptionPeriod)
 class SubscriptionPeriodAdmin(admin.ModelAdmin):
