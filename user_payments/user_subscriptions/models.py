@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import datetime
 
 from django.apps import apps
 from django.conf import settings
@@ -83,20 +83,20 @@ class Subscription(models.Model):
         Create period instances for this subscription, up to either today or
         the end of the subscription, whichever date is earlier.
         """
-        end = until or date.today()
+        end = until or timezone.now()
         if self.ends_at:
             end = min(self.ends_at, end)
         days = recurring(self.starts_at, self.periodicity)
-        this_start = next(days)
+        this_start = datetime.combine(next(days), self.starts_at.timetz())
 
         periods = list(self.periods.all())
 
         existing = set(p.starts_at for p in periods)
         while True:
-            next_start = next(days)
+            next_start = datetime.combine(next(days), self.starts_at.timetz())
             if this_start not in existing:
                 p, _created = self.periods.get_or_create(
-                    starts_at=this_start, ends_at=next_start - timedelta(days=1)
+                    starts_at=this_start, ends_at=next_start
                 )
                 periods.append(p)
             this_start = next_start
@@ -135,8 +135,8 @@ class SubscriptionPeriod(models.Model):
         related_name="periods",
         verbose_name=_("subscription"),
     )
-    starts_at = models.DateField(_("starts at"))
-    ends_at = models.DateField(_("ends at"))
+    starts_at = models.DateTimeField(_("starts at"))
+    ends_at = models.DateTimeField(_("ends at"))
     line_item = models.OneToOneField(
         LineItem,
         on_delete=models.CASCADE,
