@@ -73,6 +73,11 @@ class Subscription(models.Model):
         s = apps.get_app_config("user_payments").settings
         return self.starts_at <= timezone.now() <= self.paid_until + s.grace_period
 
+    @property
+    def in_grace_period(self):
+        s = apps.get_app_config("user_payments").settings
+        return self.paid_until <= timezone.now() <= seld.paid_until + s.grace_period
+
     def create_periods(self, *, until=None):
         """
         Create period instances for this subscription, up to either today or
