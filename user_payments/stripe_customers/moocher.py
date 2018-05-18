@@ -1,7 +1,7 @@
-from datetime import date, datetime
-from decimal import Decimal
 import json
 import time
+from datetime import date, datetime
+from decimal import Decimal
 
 from django import http
 from django.conf.urls import url
@@ -16,12 +16,11 @@ from django.utils.decorators import method_decorator
 from django.utils.http import is_safe_url
 from django.utils.translation import ugettext_lazy as _
 
+import stripe
+from app.tools.mail import render_to_mail
 from mooch.base import BaseMoocher, csrf_exempt_m, require_POST_m
 from mooch.signals import post_charge
 
-import stripe
-
-from app.tools.mail import render_to_mail
 from .models import Customer
 
 
