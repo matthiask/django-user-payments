@@ -77,8 +77,10 @@ class Subscription(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.paid_until:
-            self.paid_until = self.starts_at or timezone.now()
+        if not self.starts_at:
+            self.starts_at = timezone.now()
+        if not self.paid_until or self.paid_until < self.starts_at:
+            self.paid_until = self.starts_at
         super().save(*args, **kwargs)
 
     save.alters_data = True
