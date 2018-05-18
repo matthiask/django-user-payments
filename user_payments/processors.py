@@ -3,7 +3,7 @@ import logging
 from django.utils import timezone
 
 import stripe
-from user_payments.models import Payment
+from user_payments.models import LineItem, Payment
 from user_payments.stripe_customers.models import Customer
 
 
@@ -13,7 +13,11 @@ logger = logging.getLogger(__name__)
 class StripeSubscriptionsProcessor:
 
     def process(self):
-        for customer in Customer.objects.select_related("user"):
+        for customer in Customer.objects.filter(
+            user__in=LineItem.objects.unbound().values("user")  # XXX .unpaid()?
+        ).select_related(
+            "user"
+        ):
             payment = Payment.objects.create_pending(user=customer.user)
             if not payment:
                 continue

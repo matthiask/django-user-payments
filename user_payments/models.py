@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models, transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
 
@@ -15,9 +16,8 @@ class PaymentManager(models.Manager):
 
         Returns ``None`` if there are no unbound line items for the given user.
         """
-        # XXX payment__isnull | payment__charged_at__isnull?
         with transaction.atomic():
-            pending = LineItem.objects.filter(user=user, payment__isnull=True)
+            pending = user.user_lineitems.unbound()  # XXX .unpaid()?
             if not len(pending):
                 return None
 
@@ -49,6 +49,17 @@ class Payment(AbstractPayment):
         super().save(*args, **kwargs)
 
     save.alters_data = True
+
+
+class LineItemQuerySet(models.QuerySet):
+
+    def unbound(self):
+        return self.filter(payment__isnull=True)
+
+    def unpaid(self):
+        return self.filter(
+            Q(payment__isnull=True) | Q(payment__charged_at__isnull=True)
+        )
 
 
 class LineItem(models.Model):
@@ -87,6 +98,8 @@ class LineItem(models.Model):
         related_name="lineitems",
         verbose_name=_("payment"),
     )
+
+    objects = LineItemQuerySet.as_manager()
 
     class Meta:
         ordering = ["-created_at"]
