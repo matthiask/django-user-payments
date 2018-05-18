@@ -63,7 +63,7 @@ class Subscription(models.Model):
     )
     amount = models.DecimalField(_("amount"), max_digits=10, decimal_places=2)
 
-    renew_automatically = models.BooleanField(_("renew automatically"))
+    renew_automatically = models.BooleanField(_("renew automatically"), default=True)
     paid_until = models.DateField(_("paid until"), blank=True)
 
     objects = SubscriptionManager()
