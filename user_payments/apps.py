@@ -11,16 +11,12 @@ class UserPayments(AppConfig):
     name = "user_payments"
     verbose_name = capfirst(_("user payments"))
 
-    default_settings = {
-        "currency": "CHF",
-        "grace_period": timedelta(days=3),
-    }
+    default_settings = {"currency": "CHF", "grace_period": timedelta(days=3)}
 
     @cached_property
     def settings(self):
         from django.conf import settings
 
-        return SimpleNamespace(**{
-            **self.default_settings,
-            **getattr(settings, 'USER_PAYMENTS', {}),
-        })
+        return SimpleNamespace(
+            **{**self.default_settings, **getattr(settings, "USER_PAYMENTS", {})}
+        )

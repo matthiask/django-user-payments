@@ -50,6 +50,13 @@ class Payment(AbstractPayment):
 
     save.alters_data = True
 
+    def cancel_pending(self):
+        assert not self.charged_at
+        self.lineitems.update(payment=None)
+        self.delete()
+
+    cancel_pending.alters_data = True
+
 
 class LineItemQuerySet(models.QuerySet):
 
