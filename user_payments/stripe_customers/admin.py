@@ -36,7 +36,11 @@ def sanitize(data, key=_sentinel):
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
     list_display = (
-        "user", "customer_id_admin", "created_at", "updated_at", "active_subscriptions"
+        "user",
+        "customer_id_admin",
+        "created_at",
+        "updated_at",
+        "active_subscriptions",
     )
     raw_id_fields = ("user",)
     search_fields = ("user__email",)

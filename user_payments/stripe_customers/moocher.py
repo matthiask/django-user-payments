@@ -217,9 +217,7 @@ class StripeSubscriptionsMoocher(BaseMoocher):
                 "registration/renew_failure_stripe",
                 {"customer": customer},
                 to=[customer.user.email],
-            ).send(
-                fail_silently=False
-            )
+            ).send(fail_silently=False)
 
         elif event.type.startswith("customer.subscription."):
             customer = Customer.objects.filter(
@@ -228,9 +226,8 @@ class StripeSubscriptionsMoocher(BaseMoocher):
             if customer:
                 customer.refresh()
 
-        elif (
-            event.type.startswith("customer.")
-            and event.data.object.id.startswith("cus_")
+        elif event.type.startswith("customer.") and event.data.object.id.startswith(
+            "cus_"
         ):
             customer = Customer.objects.filter(customer_id=event.data.object.id).first()
             if customer:

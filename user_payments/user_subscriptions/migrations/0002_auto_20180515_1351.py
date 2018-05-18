@@ -13,7 +13,9 @@ class Migration(migrations.Migration):
             name="periodicity",
             field=models.CharField(
                 choices=[
-                    ("yearly", "yearly"), ("monthly", "monthly"), ("weekly", "weekly")
+                    ("yearly", "yearly"),
+                    ("monthly", "monthly"),
+                    ("weekly", "weekly"),
                 ],
                 max_length=20,
                 verbose_name="periodicity",

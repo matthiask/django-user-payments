@@ -63,7 +63,8 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={
-                "verbose_name": "subscription", "verbose_name_plural": "subscriptions"
+                "verbose_name": "subscription",
+                "verbose_name_plural": "subscriptions",
             },
         ),
         migrations.CreateModel(

@@ -57,10 +57,12 @@ default_processors = [attempt_using_stripe_customers, send_notification_mail]
 
 
 def process_unbound_items(*, processors=default_processors):
-    for user in get_user_model().objects.filter(
-        id__in=LineItem.objects.unbound().values("user")  # XXX .unpaid()?
-    ).select_related(
-        "stripe_customer"
+    for user in (
+        get_user_model()
+        .objects.filter(
+            id__in=LineItem.objects.unbound().values("user")  # XXX .unpaid()?
+        )
+        .select_related("stripe_customer")
     ):
         payment = Payment.objects.create_pending(user=user)
 
