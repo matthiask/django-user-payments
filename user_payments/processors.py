@@ -3,8 +3,8 @@ import logging
 from django.utils import timezone
 
 import stripe
-from stripe_subscriptions.models import Customer
 from user_payments.models import Payment
+from user_payments.stripe_customers.models import Customer
 
 
 logger = logging.getLogger(__name__)
