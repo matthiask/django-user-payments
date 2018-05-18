@@ -25,6 +25,7 @@ def attempt_using_stripe_customers(payment):
             customer=customer.customer_id,
             amount=payment.amount_cents,
             currency="CHF",
+            description=payment.description,
             idempotency_key=payment.id.hex,
         )
 
