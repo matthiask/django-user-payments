@@ -81,7 +81,7 @@ def process_unbound_items(*, processors=default_processors):
                     {
                         "payment": payment,
                         "email": payment.email,
-                        "processor": processor.__name,
+                        "processor": processor.__name__,
                     },
                 )
                 break
