@@ -15,7 +15,7 @@ matrix:
     - env: REQ="https://github.com/django/django/archive/master.zip#egg=Django"
 install:
 - pip install -U pip wheel
-- pip install django-mooch stripe
+- pip install django-mooch psycopg2 stripe
 - pip install $REQ
 - python setup.py install
 script: cd tests && ./manage.py test testapp && cd ..
