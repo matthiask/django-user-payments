@@ -7,5 +7,6 @@ class Command(BaseCommand):
     help = "Generate subscription periods and user payments line items"
 
     def handle(self, **options):
+        Subscription.objects.disable_autorenewal()
         Subscription.objects.create_periods()
         SubscriptionPeriod.objects.create_line_items()

@@ -18,6 +18,20 @@ class SubscriptionManager(models.Manager):
         for subscription in self.filter(renew_automatically=True):
             subscription.create_periods()
 
+    def disable_autorenewal(self):
+        """
+        Disable autorenewal for subscriptions that are past due
+
+        Uses the ``USER_PAYMENTS['disable_autorenewal_after']`` timedelta to
+        determine the timespan after which autorenewal is disabled for unpaid
+        subscriptions. Defaults to 15 days.
+        """
+        s = apps.get_app_config("user_payments").settings
+        self.filter(
+            renew_automatically=True,
+            paid_until__lt=timezone.now() - s.disable_autorenewal_after,
+        ).update(renew_automatically=False)
+
 
 class Subscription(models.Model):
     user = models.ForeignKey(
