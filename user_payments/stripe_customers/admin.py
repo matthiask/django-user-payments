@@ -45,9 +45,6 @@ class CustomerAdmin(admin.ModelAdmin):
     raw_id_fields = ("user",)
     search_fields = ("user__email",)
 
-    fields = ("user", "created_at", "customer_id_admin", "customer_admin")
-    readonly_fields = ("customer_id_admin", "customer_admin")
-
     def customer_id_admin(self, instance):
         return str(instance)
 
@@ -60,3 +57,13 @@ class CustomerAdmin(admin.ModelAdmin):
         )
 
     customer_admin.short_description = _("customer")
+
+    def get_fields(self, request, obj=None):
+        if obj is None:
+            return ("user", "customer_id")
+        return ("user", "created_at", "customer_id_admin", "customer_admin")
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj is None:
+            return ()
+        return ("customer_id_admin", "customer_admin")

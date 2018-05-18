@@ -27,6 +27,13 @@ class Customer(models.Model):
     def __str__(self):
         return "%s%s" % (self.customer_id[:10], "*" * (len(self.customer_id) - 10))
 
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.refresh(save=False)
+        super().save(*args, **kwargs)
+
+    save.alters_data = True
+
     def refresh(self, save=True):
         self.customer = stripe.Customer.retrieve(
             self.customer_id, expand=["default_source"]
