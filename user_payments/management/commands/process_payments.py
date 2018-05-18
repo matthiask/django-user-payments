@@ -11,6 +11,8 @@ class Command(BaseCommand):
     def handle(self, **options):
         logger = logging.getLogger("user_payments")
         logger.setLevel(logging.DEBUG)
-        logger.addHandler(logging.StreamHandler)
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.DEBUG)
+        logger.addHandler(handler)
 
         process_unbound_items()
