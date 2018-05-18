@@ -26,6 +26,13 @@ class Subscription(models.Model):
         related_name="user_subscriptions",
         verbose_name=_("user"),
     )
+    code = models.CharField(
+        _("code"),
+        max_length=20,
+        help_text=_(
+            "Codes must be unique per user. Allows identifying the subscription."
+        ),
+    )
     created_at = models.DateTimeField(_("created at"), default=timezone.now)
     title = models.CharField(_("title"), max_length=200)
     starts_at = models.DateTimeField(_("starts at"))
@@ -48,6 +55,7 @@ class Subscription(models.Model):
     objects = SubscriptionManager()
 
     class Meta:
+        unique_together = (("user", "code"),)
         verbose_name = _("subscription")
         verbose_name_plural = _("subscriptions")
 
