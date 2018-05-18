@@ -5,19 +5,17 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('user_subscriptions', '0007_auto_20180517_1954'),
-    ]
+    dependencies = [("user_subscriptions", "0007_auto_20180517_1954")]
 
     operations = [
         migrations.AlterField(
-            model_name='subscriptionperiod',
-            name='ends_at',
-            field=models.DateTimeField(verbose_name='ends at'),
+            model_name="subscriptionperiod",
+            name="ends_at",
+            field=models.DateTimeField(verbose_name="ends at"),
         ),
         migrations.AlterField(
-            model_name='subscriptionperiod',
-            name='starts_at',
-            field=models.DateTimeField(verbose_name='starts at'),
+            model_name="subscriptionperiod",
+            name="starts_at",
+            field=models.DateTimeField(verbose_name="starts at"),
         ),
     ]

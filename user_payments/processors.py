@@ -35,13 +35,15 @@ def attempt_using_stripe_customers(payment):
         return False
 
     else:
-        payment.payment_service_provider = 'user-payments-stripe-customers'
+        payment.payment_service_provider = "user-payments-stripe-customers"
         payment.charged_at = timezone.now()
         payment.transaction = str(charge)
         payment.save()
 
         # FIXME sender?
-        post_charge.send(sender=attempt_using_stripe_customers, payment=payment, request=None)
+        post_charge.send(
+            sender=attempt_using_stripe_customers, payment=payment, request=None
+        )
 
         return True
 
