@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 from django.apps import apps
 from django.conf import settings
@@ -49,8 +49,8 @@ class Subscription(models.Model):
     )
     created_at = models.DateTimeField(_("created at"), default=timezone.now)
     title = models.CharField(_("title"), max_length=200)
-    starts_at = models.DateTimeField(_("starts at"))
-    ends_at = models.DateTimeField(_("ends at"), blank=True, null=True)
+    starts_at = models.DateField(_("starts at"))
+    ends_at = models.DateField(_("ends at"), blank=True, null=True)
     periodicity = models.CharField(
         _("periodicity"),
         max_length=20,
@@ -64,7 +64,7 @@ class Subscription(models.Model):
     amount = models.DecimalField(_("amount"), max_digits=10, decimal_places=2)
 
     renew_automatically = models.BooleanField(_("renew automatically"))
-    paid_until = models.DateTimeField(_("paid until"), blank=True)
+    paid_until = models.DateField(_("paid until"), blank=True)
 
     objects = SubscriptionManager()
 
@@ -105,17 +105,17 @@ class Subscription(models.Model):
         Create period instances for this subscription, up to either today or
         the end of the subscription, whichever date is earlier.
         """
-        end = until or timezone.now()
+        end = until or date.today()
         if self.ends_at:
             end = min(self.ends_at, end)
         days = recurring(self.starts_at, self.periodicity)
-        this_start = datetime.combine(next(days), self.starts_at.timetz())
+        this_start = next(days)
 
         periods = list(self.periods.all())
 
         existing = set(p.starts_at for p in periods)
         while True:
-            next_start = datetime.combine(next(days), self.starts_at.timetz())
+            next_start = next(days)
             if this_start not in existing:
                 p, _created = self.periods.get_or_create(
                     starts_at=this_start, ends_at=next_start
@@ -157,8 +157,8 @@ class SubscriptionPeriod(models.Model):
         related_name="periods",
         verbose_name=_("subscription"),
     )
-    starts_at = models.DateTimeField(_("starts at"))
-    ends_at = models.DateTimeField(_("ends at"))
+    starts_at = models.DateField(_("starts at"))
+    ends_at = models.DateField(_("ends at"))
     line_item = models.OneToOneField(
         LineItem,
         on_delete=models.CASCADE,
