@@ -34,6 +34,24 @@ class SubscriptionManager(models.Manager):
 
 
 class Subscription(models.Model):
+    """
+    How to quickly generate a new subscription and fetch the first payment::
+
+        user = request.user  # Fetch the user from somewhere
+
+        subscription, created = Subscription.objects.get_or_create(
+            user=user,
+            code='plan',  # Or whatever makes sense for you
+            defaults={
+                'title': 'You should want to provide this',
+                'periodicity': 'yearly',  # or monthly, or weekly. NOT manually.
+                'amount': 60,
+            },
+        )
+        for period in subscription.create_periods():
+            period.create_line_item()
+        first_payment = Payment.objects.create_pending(user=user)
+    """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
