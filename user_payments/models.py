@@ -59,7 +59,7 @@ class Payment(AbstractPayment):
 
     @property
     def description(self):
-        return "%s: %s" % (self, ", ".join(str(item) for item in self.lineitems.all()))
+        return "Payment of %s by %s: %s" % (self.amount, self.email, ", ".join(str(item) for item in self.lineitems.all()))
 
 
 class LineItemQuerySet(models.QuerySet):
