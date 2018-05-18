@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
+from django.contrib.postgres.fields import JSONField  # TODO hmm...
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property

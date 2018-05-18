@@ -4,7 +4,9 @@ import os
 
 DEBUG = True
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "imagefield"}}
+DATABASES = {
+    "default": {"ENGINE": "django.db.backends.postgresql", "NAME": "user_payments"}
+}
 
 INSTALLED_APPS = [
     "django.contrib.auth",
@@ -15,7 +17,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "testapp",
     # Libraries
-    "imagefield",
+    "user_payments",
+    "user_payments.stripe_customers",
+    "user_payments.user_subscriptions",
 ]
 
 STATIC_URL = "/static/"
@@ -57,8 +61,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+STRIPE_SECRET_KEY = "none"
+STRIPE_PUBLISHABLE_KEY = "none"
 
 if os.environ.get("LOG"):
-    logger = logging.getLogger("imagefield")
+    logger = logging.getLogger("user_payments")
     logger.addHandler(logging.StreamHandler())
     logger.setLevel(logging.DEBUG)
