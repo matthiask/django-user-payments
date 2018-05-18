@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 
+from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import Max
@@ -69,8 +70,8 @@ class Subscription(models.Model):
 
     @property
     def is_active(self):
-        # TODO grace period?
-        return self.starts_at <= timezone.now() <= self.paid_until
+        s = apps.get_app_config("user_payments").settings
+        return self.starts_at <= timezone.now() <= self.paid_until + s.grace_period
 
     def create_periods(self, *, until=None):
         """
