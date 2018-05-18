@@ -5,34 +5,32 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('user_subscriptions', '0009_auto_20180518_1629'),
-    ]
+    dependencies = [("user_subscriptions", "0009_auto_20180518_1629")]
 
     operations = [
         migrations.AlterField(
-            model_name='subscription',
-            name='ends_at',
-            field=models.DateField(blank=True, null=True, verbose_name='ends at'),
+            model_name="subscription",
+            name="ends_at",
+            field=models.DateField(blank=True, null=True, verbose_name="ends at"),
         ),
         migrations.AlterField(
-            model_name='subscription',
-            name='paid_until',
-            field=models.DateField(blank=True, verbose_name='paid until'),
+            model_name="subscription",
+            name="paid_until",
+            field=models.DateField(blank=True, verbose_name="paid until"),
         ),
         migrations.AlterField(
-            model_name='subscription',
-            name='starts_at',
-            field=models.DateField(verbose_name='starts at'),
+            model_name="subscription",
+            name="starts_at",
+            field=models.DateField(verbose_name="starts at"),
         ),
         migrations.AlterField(
-            model_name='subscriptionperiod',
-            name='ends_at',
-            field=models.DateField(verbose_name='ends at'),
+            model_name="subscriptionperiod",
+            name="ends_at",
+            field=models.DateField(verbose_name="ends at"),
         ),
         migrations.AlterField(
-            model_name='subscriptionperiod',
-            name='starts_at',
-            field=models.DateField(verbose_name='starts at'),
+            model_name="subscriptionperiod",
+            name="starts_at",
+            field=models.DateField(verbose_name="starts at"),
         ),
     ]
