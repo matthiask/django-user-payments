@@ -366,10 +366,14 @@ class StripeMoocher(BaseMoocher):
                 and request.POST.get("token")
                 and request.user.is_authenticated
             ):
+                kw = {}
+                if self.use_idempotency_key:
+                    kw["idempotency_key"] = "customer-%s" % instance.id.hex
                 obj = stripe.Customer.create(
                     email=request.user.email,
                     source=request.POST["token"],
                     expand=["default_source"],
+                    **kw
                 )
                 customer = Customer.objects.create(
                     user=request.user, customer_id=obj.id, customer=obj
@@ -377,7 +381,7 @@ class StripeMoocher(BaseMoocher):
 
             kw = {}
             if self.use_idempotency_key:
-                kw["idempotency_key"] = instance.id.hex
+                kw["idempotency_key"] = "charge-%s" % instance.id.hex
 
             if customer:
                 # FIXME Only with valid default source
