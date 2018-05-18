@@ -4,7 +4,6 @@ language: python
 python:
 - "3.6"
 - "3.5"
-- "2.7"
 addons:
   postgresql: "9.4"
 env:
@@ -14,11 +13,6 @@ env:
 matrix:
   allow_failures:
     - env: REQ="https://github.com/django/django/archive/master.zip#egg=Django"
-  exclude:
-    - python: "2.7"
-      env: REQ="Django>=2.0,<2.1"
-    - python: "2.7"
-      env: REQ="https://github.com/django/django/archive/master.zip#egg=Django"
 install:
 - pip install -U pip wheel
 - pip install django-mooch stripe
