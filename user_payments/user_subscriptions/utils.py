@@ -52,7 +52,7 @@ def recurring(start, periodicity):
         raise ValueError("Unknown periodicity %r" % periodicity)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     from pprint import pprint
 
     def twenty(start, periodicity):
