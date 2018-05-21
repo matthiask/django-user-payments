@@ -113,13 +113,15 @@ class Subscription(models.Model):
 
     @property
     def starts_at(self):
-        # TODO make_aware
-        return datetime.combine(self.starts_on, time.min)
+        return timezone.make_aware(
+            datetime.combine(self.starts_on, time.min), timezone.get_default_timezone()
+        )
 
     @property
     def ends_at(self):
-        # TODO make_aware
-        return datetime.combine(self.ends_on, time.max)
+        return timezone.make_aware(
+            datetime.combine(self.ends_on, time.max), timezone.get_default_timezone()
+        )
 
     @property
     def is_active(self):
