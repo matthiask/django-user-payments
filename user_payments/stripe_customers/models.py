@@ -38,7 +38,8 @@ class Customer(models.Model):
     @property
     def customer(self):
         """
-        Return the parsed version of the JSON blob.
+        Return the parsed version of the JSON blob or ``None`` if there is no
+        data around to be parsed.
 
         After calling ``Customer.refresh()`` this property even returns the
         objects returned by the Stripe library as they come.
@@ -46,6 +47,8 @@ class Customer(models.Model):
         Does NOT work with ``instance.refresh_from_db()`` -- you have to fetch
         a completely new object from the database.
         """
+        if not self.customer_data:
+            return None
         if not hasattr(self, "_customer_data_cache"):
             self._customer_data_cache = json.loads(self.customer_data)
         return self._customer_data_cache
