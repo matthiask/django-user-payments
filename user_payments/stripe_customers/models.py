@@ -64,7 +64,8 @@ class Customer(models.Model):
 
     @cached_property
     def active_subscriptions(self):
-        # FIXME Remove this when everything has been moved over to use user subscriptions.
+        # FIXME Remove this when everything has been moved over to use user
+        # subscriptions.
         if not self.customer:
             return {}
         return {

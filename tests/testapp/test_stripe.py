@@ -1,10 +1,10 @@
 from unittest import mock
-import stripe
 
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils.translation import deactivate_all
 
+import stripe
 from user_payments.stripe_customers.models import Customer
 
 
@@ -42,9 +42,7 @@ class Test(TestCase):
 
     def test_refresh(self):
         with mock.patch.object(stripe.Customer, "retrieve", return_value={"bla": 3}):
-            Customer(
-                customer_id="cus_1234567890", user=self.user
-            ).refresh()
+            Customer(customer_id="cus_1234567890", user=self.user).refresh()
 
         customer = Customer.objects.get()
         self.assertEqual(customer.customer_data, '{"bla": 3}')
