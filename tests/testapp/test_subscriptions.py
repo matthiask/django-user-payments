@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -29,6 +29,7 @@ class Test(TestCase):
             amount=60,
             starts_on=date(2040, 1, 1),
         )
+        self.assertEqual(subscription.ends_at, None)
 
         self.assertEqual(SubscriptionPeriod.objects.count(), 0)
         Subscription.objects.create_periods()
@@ -50,13 +51,97 @@ class Test(TestCase):
 
         subscription.refresh_from_db()
         # Not paid yet.
-        self.assertEqual(subscription.paid_until, date(2040, 1, 1))
+        self.assertEqual(subscription.paid_until, date(2039, 12, 31))
 
         payment.charged_at = timezone.now()
         payment.save()
 
         subscription.refresh_from_db()
-        self.assertEqual(subscription.paid_until, date(2040, 1, 1))
+        self.assertEqual(subscription.paid_until, date(2039, 12, 31))
 
-        subscription.update_paid_until()  # XXX call automatically?
+        subscription.update_paid_until(save=False)  # XXX call automatically?
         self.assertEqual(subscription.paid_until, date(2040, 3, 31))
+
+        subscription.update_paid_until()
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.paid_until, date(2040, 3, 31))
+
+    def test_starts_on(self):
+        subscription = Subscription.objects.create(
+            user=self.user,
+            code="test2",
+            title="Test subscription 2",
+            periodicity="whatever",
+            amount=0,
+        )
+        self.assertEqual(subscription.starts_on, date.today())
+
+        self.assertTrue(subscription.is_active)
+        self.assertTrue(subscription.in_grace_period)
+
+    def test_ends_on(self):
+        subscription = Subscription.objects.create(
+            user=self.user,
+            code="test3",
+            title="Test subscription 3",
+            periodicity="weekly",
+            amount=0,
+            starts_on=date(2016, 1, 1),
+            ends_on=date(2016, 1, 31),
+        )
+
+        self.assertEqual(
+            [p.ends_on for p in subscription.create_periods()],
+            [
+                date(2016, 1, 7),
+                date(2016, 1, 14),
+                date(2016, 1, 21),
+                date(2016, 1, 28),
+                date(2016, 2, 4),
+            ],
+        )
+
+        self.assertTrue(
+            tuple(subscription.ends_at.timetuple())[:6], (2016, 1, 31, 23, 59, 59)
+        )
+
+    def test_autorenewal(self):
+        subscription = Subscription.objects.create(
+            user=self.user,
+            code="test4",
+            title="Test subscription 4",
+            periodicity="weekly",
+            amount=0,
+            starts_on=date.today() - timedelta(days=30),
+        )
+
+        # Exactly one period
+        period, = subscription.create_periods(until=subscription.starts_on)
+        period.create_line_item()
+        payment = Payment.objects.create_pending(user=self.user)
+        payment.charged_at = timezone.now()
+        payment.save()
+
+        subscription.update_paid_until()
+
+        self.assertEqual(
+            Subscription.objects.filter(renew_automatically=True).count(), 1
+        )
+        Subscription.objects.disable_autorenewal()
+        self.assertEqual(
+            Subscription.objects.filter(renew_automatically=True).count(), 0
+        )
+
+        # Restart the subscription
+        subscription.refresh_from_db()
+
+        subscription.starts_on = date.today()
+        subscription.save()
+
+        # Exactl
+        periods = subscription.create_periods()
+
+        self.assertEqual(
+            [p.starts_on for p in periods],
+            [date.today() - timedelta(days=30), date.today()],
+        )

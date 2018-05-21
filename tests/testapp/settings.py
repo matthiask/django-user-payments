@@ -34,6 +34,10 @@ LOGIN_REDIRECT_URL = "/?login=1"
 ROOT_URLCONF = "testapp.urls"
 LANGUAGES = (("en", "English"), ("de", "German"))
 
+USE_TZ = True
+USE_I18N = True
+USE_L10N = True
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

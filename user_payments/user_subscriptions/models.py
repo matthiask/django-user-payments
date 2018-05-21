@@ -98,7 +98,8 @@ class Subscription(models.Model):
         if not self.starts_on:
             self.starts_on = date.today()
         if not self.paid_until or self.paid_until < self.starts_on:
-            self.paid_until = self.starts_on
+            # New subscription instance or restarted subscription.
+            self.paid_until = self.starts_on - timedelta(days=1)
         super().save(*args, **kwargs)
 
     save.alters_data = True
@@ -119,19 +120,32 @@ class Subscription(models.Model):
 
     @property
     def ends_at(self):
+        return (
+            timezone.make_aware(
+                datetime.combine(self.ends_on, time.max),
+                timezone.get_default_timezone(),
+            )
+            if self.ends_on
+            else None
+        )
+
+    @property
+    def paid_until_at(self):
         return timezone.make_aware(
-            datetime.combine(self.ends_on, time.max), timezone.get_default_timezone()
+            datetime.combine(self.paid_until, time.max), timezone.get_default_timezone()
         )
 
     @property
     def is_active(self):
         s = apps.get_app_config("user_payments").settings
-        return self.starts_at <= timezone.now() <= self.paid_until + s.grace_period
+        return self.starts_at <= timezone.now() <= self.paid_until_at + s.grace_period
 
     @property
     def in_grace_period(self):
         s = apps.get_app_config("user_payments").settings
-        return self.paid_until <= timezone.now() <= self.paid_until + s.grace_period
+        return (
+            self.paid_until_at <= timezone.now() <= self.paid_until_at + s.grace_period
+        )
 
     def create_periods(self, *, until=None):
         """
@@ -148,7 +162,7 @@ class Subscription(models.Model):
 
         periods = list(self.periods.all())
 
-        if this_start < end:
+        if this_start <= end:
             existing = set(p.starts_on for p in periods)
             while True:
                 next_start = next(days)
