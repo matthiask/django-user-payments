@@ -5,7 +5,7 @@ import os
 DEBUG = True
 
 DATABASES = {
-    "default": {"ENGINE": "django.db.backends.postgresql", "NAME": "user_payments"}
+    "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": ":memory:"}
 }
 
 INSTALLED_APPS = [

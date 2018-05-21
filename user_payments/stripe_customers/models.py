@@ -1,5 +1,6 @@
+import json
+
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField  # TODO hmm...
 from django.db import models
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -18,7 +19,7 @@ class Customer(models.Model):
     created_at = models.DateTimeField(_("created at"), default=timezone.now)
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
     customer_id = models.CharField(_("customer ID"), max_length=50, unique=True)
-    customer = JSONField(_("customer"), blank=True, null=True)
+    customer_data = models.TextField(_("customer data"), blank=True)
 
     class Meta:
         verbose_name = _("customer")
@@ -28,11 +29,22 @@ class Customer(models.Model):
         return "%s%s" % (self.customer_id[:10], "*" * (len(self.customer_id) - 10))
 
     def save(self, *args, **kwargs):
-        if not self.customer:
+        if not self.customer_data:
             self.refresh(save=False)
         super().save(*args, **kwargs)
 
     save.alters_data = True
+
+    @property
+    def customer(self):
+        if not hasattr(self, "_customer_data_cache"):
+            self._customer_data_cache = json.loads(self.customer_data)
+        return self._customer_data_cache
+
+    @customer.setter
+    def customer(self, value):
+        self._customer_data_cache = value
+        self.customer_data = json.dumps(self._customer_data_cache)
 
     def refresh(self, save=True):
         self.customer = stripe.Customer.retrieve(
