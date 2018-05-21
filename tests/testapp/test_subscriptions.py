@@ -27,7 +27,7 @@ class Test(TestCase):
             title="Test subscription 1",
             periodicity="monthly",
             amount=60,
-            starts_at=date(2040, 1, 1),
+            starts_on=date(2040, 1, 1),
         )
 
         self.assertEqual(SubscriptionPeriod.objects.count(), 0)

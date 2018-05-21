@@ -8,8 +8,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = (
         "user",
         "title",
-        "starts_at",
-        "ends_at",
+        "starts_on",
+        "ends_on",
         "periodicity",
         "amount",
         "paid_until",
@@ -28,5 +28,5 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(models.SubscriptionPeriod)
 class SubscriptionPeriodAdmin(admin.ModelAdmin):
-    list_display = ("subscription", "starts_at", "ends_at", "line_item")
+    list_display = ("subscription", "starts_on", "ends_on", "line_item")
     raw_id_fields = ("subscription", "line_item")

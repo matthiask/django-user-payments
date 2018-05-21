@@ -67,8 +67,8 @@ class Subscription(models.Model):
     )
     created_at = models.DateTimeField(_("created at"), default=timezone.now)
     title = models.CharField(_("title"), max_length=200)
-    starts_at = models.DateField(_("starts at"))  # TODO starts_on, ends_on for dates
-    ends_at = models.DateField(_("ends at"), blank=True, null=True)
+    starts_on = models.DateField(_("starts on"))
+    ends_on = models.DateField(_("ends on"), blank=True, null=True)
     periodicity = models.CharField(
         _("periodicity"),
         max_length=20,
@@ -95,10 +95,10 @@ class Subscription(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.starts_at:
-            self.starts_at = date.today()
-        if not self.paid_until or self.paid_until < self.starts_at:
-            self.paid_until = self.starts_at
+        if not self.starts_on:
+            self.starts_on = date.today()
+        if not self.paid_until or self.paid_until < self.starts_on:
+            self.paid_until = self.starts_on
         super().save(*args, **kwargs)
 
     save.alters_data = True
@@ -106,20 +106,20 @@ class Subscription(models.Model):
     def update_paid_until(self, save=True):
         # TODO call this from somewhere...
         self.paid_until = (
-            self.periods.paid().aggregate(m=Max("ends_at"))["m"] or self.paid_until
+            self.periods.paid().aggregate(m=Max("ends_on"))["m"] or self.paid_until
         )
         if save:
             self.save()
 
     @property
-    def starts_at_(self):
+    def starts_at(self):
         # TODO make_aware
-        return datetime.combine(self.starts_at, time.min)
+        return datetime.combine(self.starts_on, time.min)
 
     @property
-    def ends_at_(self):
+    def ends_at(self):
         # TODO make_aware
-        return datetime.combine(self.ends_at, time.max)
+        return datetime.combine(self.ends_on, time.max)
 
     @property
     def is_active(self):
@@ -139,20 +139,20 @@ class Subscription(models.Model):
         ``until`` is interpreted as "up to and including".
         """
         end = until or date.today()
-        if self.ends_at:
-            end = min(self.ends_at, end)
-        days = recurring(self.starts_at, self.periodicity)
+        if self.ends_on:
+            end = min(self.ends_on, end)
+        days = recurring(self.starts_on, self.periodicity)
         this_start = next(days)
 
         periods = list(self.periods.all())
 
         if this_start < end:
-            existing = set(p.starts_at for p in periods)
+            existing = set(p.starts_on for p in periods)
             while True:
                 next_start = next(days)
                 if this_start not in existing:
                     p, _created = self.periods.get_or_create(
-                        starts_at=this_start, ends_at=next_start - timedelta(days=1)
+                        starts_on=this_start, ends_on=next_start - timedelta(days=1)
                     )
                     periods.append(p)
                 this_start = next_start
@@ -191,8 +191,8 @@ class SubscriptionPeriod(models.Model):
         related_name="periods",
         verbose_name=_("subscription"),
     )
-    starts_at = models.DateField(_("starts at"))
-    ends_at = models.DateField(_("ends at"))
+    starts_on = models.DateField(_("starts on"))
+    ends_on = models.DateField(_("ends on"))
     line_item = models.OneToOneField(
         LineItem,
         on_delete=models.CASCADE,
@@ -204,12 +204,12 @@ class SubscriptionPeriod(models.Model):
     objects = SubscriptionPeriodManager()
 
     class Meta:
-        unique_together = (("subscription", "starts_at"),)
+        unique_together = (("subscription", "starts_on"),)
         verbose_name = _("subscription period")
         verbose_name_plural = _("subscription periods")
 
     def __str__(self):
-        return "%s (%s - %s)" % (self.subscription, self.starts_at, self.ends_at)
+        return "%s (%s - %s)" % (self.subscription, self.starts_on, self.ends_on)
 
     def create_line_item(self):
         """
