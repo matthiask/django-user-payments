@@ -37,6 +37,15 @@ class Customer(models.Model):
 
     @property
     def customer(self):
+        """
+        Return the parsed version of the JSON blob.
+
+        After calling ``Customer.refresh()`` this property even returns the
+        objects returned by the Stripe library as they come.
+
+        Does NOT work with ``instance.refresh_from_db()`` -- you have to fetch
+        a completely new object from the database.
+        """
         if not hasattr(self, "_customer_data_cache"):
             self._customer_data_cache = json.loads(self.customer_data)
         return self._customer_data_cache
@@ -55,6 +64,7 @@ class Customer(models.Model):
 
     @cached_property
     def active_subscriptions(self):
+        # FIXME Remove this when everything has been moved over to use user subscriptions.
         if not self.customer:
             return {}
         return {
