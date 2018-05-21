@@ -34,19 +34,21 @@ def recurring(start, periodicity):
     leap year dates will stay on 20xx-02-29 and not be delayed.
     """
     if periodicity == "yearly":
-        return (
+        return (  # pragma: no branch
             next_valid_day(start.year + i, start.month, start.day)
             for i in itertools.count()
         )
 
     elif periodicity == "monthly":
-        return (
+        return (  # pragma: no branch
             next_valid_day(start.year, start.month + i, start.day)
             for i in itertools.count()
         )
 
     elif periodicity == "weekly":
-        return (start + timedelta(days=i * 7) for i in itertools.count())
+        return (  # pragma: no branch
+            start + timedelta(days=i * 7) for i in itertools.count()
+        )
 
     else:
         raise ValueError("Unknown periodicity %r" % periodicity)
