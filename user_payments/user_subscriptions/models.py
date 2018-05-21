@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 
 from django.apps import apps
 from django.conf import settings
@@ -67,7 +67,7 @@ class Subscription(models.Model):
     )
     created_at = models.DateTimeField(_("created at"), default=timezone.now)
     title = models.CharField(_("title"), max_length=200)
-    starts_at = models.DateField(_("starts at"))
+    starts_at = models.DateField(_("starts at"))  # TODO starts_on, ends_on for dates
     ends_at = models.DateField(_("ends at"), blank=True, null=True)
     periodicity = models.CharField(
         _("periodicity"),
@@ -96,7 +96,7 @@ class Subscription(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.starts_at:
-            self.starts_at = timezone.now()
+            self.starts_at = date.today()
         if not self.paid_until or self.paid_until < self.starts_at:
             self.paid_until = self.starts_at
         super().save(*args, **kwargs)
@@ -104,11 +104,22 @@ class Subscription(models.Model):
     save.alters_data = True
 
     def update_paid_until(self, save=True):
+        # TODO call this from somewhere...
         self.paid_until = (
             self.periods.paid().aggregate(m=Max("ends_at"))["m"] or self.paid_until
         )
         if save:
             self.save()
+
+    @property
+    def starts_at_(self):
+        # TODO make_aware
+        return datetime.combine(self.starts_at, time.min)
+
+    @property
+    def ends_at_(self):
+        # TODO make_aware
+        return datetime.combine(self.ends_at, time.max)
 
     @property
     def is_active(self):
@@ -124,6 +135,8 @@ class Subscription(models.Model):
         """
         Create period instances for this subscription, up to either today or
         the end of the subscription, whichever date is earlier.
+
+        ``until`` is interpreted as "up to and including".
         """
         end = until or date.today()
         if self.ends_at:
@@ -133,22 +146,23 @@ class Subscription(models.Model):
 
         periods = list(self.periods.all())
 
-        existing = set(p.starts_at for p in periods)
-        while True:
-            next_start = next(days)
-            if this_start not in existing:
-                p, _created = self.periods.get_or_create(
-                    starts_at=this_start, ends_at=next_start - timedelta(days=1)
-                )
-                periods.append(p)
-            this_start = next_start
+        if this_start < end:
+            existing = set(p.starts_at for p in periods)
+            while True:
+                next_start = next(days)
+                if this_start not in existing:
+                    p, _created = self.periods.get_or_create(
+                        starts_at=this_start, ends_at=next_start - timedelta(days=1)
+                    )
+                    periods.append(p)
+                this_start = next_start
 
-            # TODO This might be a good place to already generate periods
-            # for the near future to inform users that a payment will soon
-            # be due.
+                # TODO This might be a good place to already generate periods
+                # for the near future to inform users that a payment will soon
+                # be due.
 
-            if this_start >= end:
-                break
+                if this_start > end:
+                    break
 
         return periods
 
