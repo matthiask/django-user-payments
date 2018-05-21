@@ -28,7 +28,7 @@ class Customer(models.Model):
         return "%s%s" % (self.customer_id[:10], "*" * (len(self.customer_id) - 10))
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if not self.customer:
             self.refresh(save=False)
         super().save(*args, **kwargs)
 
