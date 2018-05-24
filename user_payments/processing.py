@@ -67,30 +67,32 @@ def process_unbound_items(*, processors=default_processors):
         # TODO Also process pending payments? Probably not here.
 
         payment = Payment.objects.create_pending(user=user)
-        if not payment:  # pragma: no cover (unlikely)
-            continue
+        if payment:  # pragma: no branch (very unlikely)
+            process_payment(payment, processors=processors)
 
-        logger.info(
-            "Processing: %(payment)s by %(email)s",
+
+def process_payment(payment, *, processors=default_processors):
+    logger.info(
+        "Processing: %(payment)s by %(email)s",
+        {"payment": payment, "email": payment.email},
+    )
+
+    for processor in processors:
+        # Success processing the payment?
+        if processor(payment):
+            logger.info(
+                "Success: %(payment)s by %(email)s with %(processor)s",
+                {
+                    "payment": payment,
+                    "email": payment.email,
+                    "processor": processor.__name__,
+                },
+            )
+            break
+    else:
+
+        logger.warning(
+            "Canceling: %(payment)s by %(email)s",
             {"payment": payment, "email": payment.email},
         )
-
-        for processor in processors:
-            # Success processing the payment?
-            if processor(payment):
-                logger.info(
-                    "Success: %(payment)s by %(email)s with %(processor)s",
-                    {
-                        "payment": payment,
-                        "email": payment.email,
-                        "processor": processor.__name__,
-                    },
-                )
-                break
-        else:
-
-            logger.warning(
-                "Canceling: %(payment)s by %(email)s",
-                {"payment": payment, "email": payment.email},
-            )
-            payment.cancel_pending()
+        payment.cancel_pending()
