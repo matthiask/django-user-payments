@@ -30,21 +30,22 @@ class Test(TestCase):
 
         with mock.patch.object(stripe.Customer, "retrieve", return_value=data):
             customer = Customer.objects.create(
-                customer_id="cus_BVuJJZtpmo1234", user=self.user
+                customer_id="cus_BdO5X6Bj123456", user=self.user
             )
 
-        self.assertEqual(str(customer), "cus_BVuJJZ********")
-        self.assertEqual(customer.active_subscriptions, {})
+        self.assertEqual(str(customer), "cus_BdO5X6********")
+        self.assertEqual(customer.active_subscriptions, {"stadtbuergerin": True})
 
         client = self.login()
 
         response = client.get(
             "/admin/stripe_customers/customer/%s/change/" % customer.pk
         )
+        print(response.content.decode("utf-8"))
         self.assertContains(
-            response, "&quot;id&quot;: &quot;card_1B8sUM******************&quot;"
+            response, "&quot;id&quot;: &quot;card_1BG7Jj******************&quot;"
         )
-        self.assertNotContains(response, "cus_BVuJJZtpmo1234")
+        self.assertNotContains(response, "cus_BdO5X6Bj123456")
 
     def test_property(self):
 

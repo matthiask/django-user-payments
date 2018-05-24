@@ -167,12 +167,7 @@ class Test(TestCase):
         self.assertEqual(SubscriptionPeriod.objects.count(), 1)
 
     def test_admin_update(self):
-        values = {
-            "code": "yay",
-            "title": "yay",
-            "periodicity": "yearly",
-            "amount": 10,
-        }
+        values = {"code": "yay", "title": "yay", "periodicity": "yearly", "amount": 10}
 
         subscription = Subscription.objects.create(user=self.user, **values)
 
@@ -184,7 +179,7 @@ class Test(TestCase):
                 "created_at_1": "12:00",
                 "starts_on": date.today().strftime("%Y-%m-%d"),
                 "user": self.user.pk,
-                **values
+                **values,
             },
         )
         self.assertRedirects(response, "/admin/user_subscriptions/subscription/")

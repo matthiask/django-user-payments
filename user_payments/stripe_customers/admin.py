@@ -8,29 +8,22 @@ from django.utils.translation import ugettext_lazy as _
 from . import models
 
 
-_sentinel = object()
-
-
 def sanitize_value(matchobj):
     return "%s%s" % (matchobj.group(1), "*" * len(matchobj.group(3)))
 
 
-def sanitize(data, key=_sentinel):
+def sanitize(data, *, key=None):
     if isinstance(data, dict):
         return {key: sanitize(value, key=key) for key, value in data.items()}
     elif isinstance(data, list):
         return [sanitize(item) for item in data]
-
-    if key is not _sentinel:
-        if not isinstance(data, str):
-            return data
-
-        if key in ("fingerprint", "last4"):
-            return "*" * len(data)
-
+    elif key in ("fingerprint", "last4"):
+        return "*" * len(data)
+    elif isinstance(data, str):
         return re.sub(r"((cus_|sub_|card_)\w{6})(\w+)", sanitize_value, data)
-
-    return data
+    else:
+        # Bools, ints, etc.
+        return data
 
 
 @admin.register(models.Customer)
