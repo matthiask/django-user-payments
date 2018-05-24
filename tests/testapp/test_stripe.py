@@ -41,7 +41,6 @@ class Test(TestCase):
         response = client.get(
             "/admin/stripe_customers/customer/%s/change/" % customer.pk
         )
-        print(response.content.decode("utf-8"))
         self.assertContains(
             response, "&quot;id&quot;: &quot;card_1BG7Jj******************&quot;"
         )

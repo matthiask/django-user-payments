@@ -52,11 +52,11 @@ class CustomerAdmin(admin.ModelAdmin):
     customer_admin.short_description = _("customer")
 
     def get_fields(self, request, obj=None):
-        if obj is None:
-            return ("user", "customer_id")
-        return ("user", "created_at", "customer_id_admin", "customer_admin")
+        return (
+            ("user", "created_at", "customer_id_admin", "customer_admin")
+            if obj
+            else ("user", "customer_id")
+        )
 
     def get_readonly_fields(self, request, obj=None):
-        if obj is None:
-            return ()
-        return ("customer_id_admin", "customer_admin")
+        return ("customer_id_admin", "customer_admin") if obj else ()
