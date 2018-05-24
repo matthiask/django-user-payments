@@ -145,3 +145,50 @@ class Test(TestCase):
             [p.starts_on for p in periods],
             [date.today() - timedelta(days=30), date.today()],
         )
+
+    def test_admin_create(self):
+        client = self.login()
+        response = client.post(
+            "/admin/user_subscriptions/subscription/add/",
+            {
+                "user": self.user.pk,
+                "code": "yay",
+                "title": "yay",
+                "starts_on": date.today().strftime("%Y-%m-%d"),
+                "periodicity": "yearly",
+                "amount": 10,
+                "created_at_0": date.today().strftime("%Y-%m-%d"),
+                "created_at_1": "12:00",
+            },
+        )
+        self.assertRedirects(response, "/admin/user_subscriptions/subscription/")
+
+        self.assertEqual(Subscription.objects.count(), 1)
+        self.assertEqual(SubscriptionPeriod.objects.count(), 1)
+
+    def test_admin_update(self):
+        values = {
+            "code": "yay",
+            "title": "yay",
+            "periodicity": "yearly",
+            "amount": 10,
+        }
+
+        subscription = Subscription.objects.create(user=self.user, **values)
+
+        client = self.login()
+        response = client.post(
+            "/admin/user_subscriptions/subscription/%s/change/" % subscription.pk,
+            {
+                "created_at_0": date.today().strftime("%Y-%m-%d"),
+                "created_at_1": "12:00",
+                "starts_on": date.today().strftime("%Y-%m-%d"),
+                "user": self.user.pk,
+                **values
+            },
+        )
+        self.assertRedirects(response, "/admin/user_subscriptions/subscription/")
+
+        self.assertEqual(Subscription.objects.count(), 1)
+        # Periods are NOT automatically created when updating subscriptions
+        self.assertEqual(SubscriptionPeriod.objects.count(), 0)
