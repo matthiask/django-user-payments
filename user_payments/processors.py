@@ -64,8 +64,10 @@ def process_unbound_items(*, processors=default_processors):
         )
         .select_related("stripe_customer")
     ):
+        # TODO Also process pending payments? Probably not here.
+
         payment = Payment.objects.create_pending(user=user)
-        if not payment:
+        if not payment:  # pragma: no cover (unlikely)
             continue
 
         logger.info(
