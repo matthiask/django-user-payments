@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from user_payments.processors import process_unbound_items
+from user_payments.processing import process_unbound_items
 
 
 class Command(BaseCommand):
