@@ -17,7 +17,7 @@ from django.utils.http import is_safe_url
 from django.utils.translation import ugettext_lazy as _
 
 import stripe
-from app.tools.mail import render_to_mail
+# from app.tools.mail import render_to_mail
 from mooch.base import BaseMoocher, csrf_exempt_m, require_POST_m
 from mooch.signals import post_charge
 
