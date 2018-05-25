@@ -1,6 +1,6 @@
 from unittest import mock
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser, User
 from django.test import RequestFactory, TestCase
 from django.utils.translation import deactivate_all
 
@@ -21,23 +21,26 @@ class Test(TestCase):
 
     def setUp(self):
         self.user = User.objects.create_superuser("admin", "admin@test.ch", "blabla")
+        self.moocher = StripeMoocher(
+            model=Payment, publishable_key="pk", secret_key="sk"
+        )
+        self.rf = RequestFactory()
         deactivate_all()
 
     def test_moocher(self):
-        moocher = StripeMoocher(model=Payment, publishable_key="pk", secret_key="sk")
-
-        rf = RequestFactory()
-
         payment = Payment.objects.create(user=self.user, amount=10)
-        request = rf.post("/", {"id": payment.id.hex, "token": "test"})
+        request = self.rf.post("/", {"id": payment.id.hex, "token": "test"})
         request.user = self.user
 
         with mock.patch.object(
             stripe.Customer, "create", return_value=AttrDict(id="cus_id")
         ):
             with mock.patch.object(stripe.Charge, "create", return_value={}):
-                response = moocher.charge_view(request)
+                response = self.moocher.charge_view(request)
 
+        self.assertEqual(response.status_code, 302)
+
+        # A customer has been automagically created
         customer = Customer.objects.get()
         self.assertEqual(customer, self.user.stripe_customer)
         self.assertEqual(customer.customer_id, "cus_id")
@@ -45,4 +48,44 @@ class Test(TestCase):
         payment.refresh_from_db()
         self.assertTrue(payment.charged_at is not None)
 
-        print(response)
+    def test_individual_payment(self):
+        payment = Payment.objects.create(user=self.user, amount=10)
+        request = self.rf.post("/", {"id": payment.id.hex, "token": "test"})
+        request.user = AnonymousUser()
+
+        with mock.patch.object(stripe.Charge, "create", return_value={}):
+            response = self.moocher.charge_view(request)
+
+        self.assertEqual(response.status_code, 302)
+
+        # No customer, user not logged in... (maybe makes not much sense for
+        # user payments .-D
+        self.assertEqual(Customer.objects.count(), 0)
+
+        payment.refresh_from_db()
+        self.assertTrue(payment.charged_at is not None)
+
+    def test_failing_charge(self):
+        payment = Payment.objects.create(user=self.user, amount=10)
+        request = self.rf.post("/", {"id": payment.id.hex, "token": "test"})
+        request.user = AnonymousUser()
+
+        class Messages(list):
+
+            def add(self, *args):
+                self.append(args)
+
+        request._messages = Messages()
+
+        with mock.patch.object(
+            stripe.Charge,
+            "create",
+            side_effect=stripe.CardError("problem", "param", "code"),
+        ):
+            response = self.moocher.charge_view(request)
+
+        self.assertEqual(response.status_code, 302)
+
+        payment.refresh_from_db()
+        self.assertTrue(payment.charged_at is None)
+        self.assertEqual(request._messages, [(40, "Card error: problem", "")])
