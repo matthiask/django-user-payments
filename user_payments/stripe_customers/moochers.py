@@ -4,6 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from django import http
+from django.apps import apps
 from django.conf.urls import url
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -344,6 +345,8 @@ class StripeMoocher(BaseMoocher):
     @csrf_exempt_m
     @require_POST_m
     def charge_view(self, request):
+        s = apps.get_app_config("user_payments").settings
+
         try:
             customer = request.user.stripe_customer
         except (AttributeError, Customer.DoesNotExist):
@@ -363,29 +366,24 @@ class StripeMoocher(BaseMoocher):
                 and request.user.is_authenticated
             ):
                 kw = {}
-                if self.use_idempotency_key:
-                    kw["idempotency_key"] = "customer-%s" % instance.id.hex
                 obj = stripe.Customer.create(
                     email=request.user.email,
                     source=request.POST["token"],
                     expand=["default_source"],
+                    idempotency_key="customer-%s" % request.user.id,
                     **kw
                 )
                 customer = Customer.objects.create(
                     user=request.user, customer_id=obj.id, customer=obj
                 )
 
-            kw = {}
-            if self.use_idempotency_key:
-                kw["idempotency_key"] = "charge-%s" % instance.id.hex
-
             if customer:
                 # FIXME Only with valid default source
                 charge = stripe.Charge.create(
                     customer=customer.customer_id,
                     amount=instance.amount_cents,
-                    currency="CHF",
-                    **kw
+                    currency=s.currency,
+                    idempotency_key="charge-%s-%s" % (customer.customer_id, instance.amount_cents),
                 )
             else:
                 # TODO create customer anyway, and stash away the customer ID
@@ -393,8 +391,8 @@ class StripeMoocher(BaseMoocher):
                 charge = stripe.Charge.create(
                     source=request.POST["token"],
                     amount=instance.amount_cents,
-                    currency="CHF",
-                    **kw
+                    currency=s.currency,
+                    idempotency_key="charge-%s-%s" % (customer.customer_id, instance.amount_cents),
                 )
 
             # TODO Error handling

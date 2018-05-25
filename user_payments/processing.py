@@ -1,6 +1,6 @@
 import logging
 
-# from django.apps import apps
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 
 def attempt_using_stripe_customers(payment):
+    s = apps.get_app_config("user_payments").settings
+
     try:
         customer = payment.user.stripe_customer
     except Customer.DoesNotExist:
@@ -24,7 +26,7 @@ def attempt_using_stripe_customers(payment):
         charge = stripe.Charge.create(
             customer=customer.customer_id,
             amount=payment.amount_cents,
-            currency="CHF",
+            currency=s.currency,
             description=payment.description,
             idempotency_key=payment.id.hex,
         )
