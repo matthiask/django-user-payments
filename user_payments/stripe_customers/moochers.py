@@ -18,7 +18,6 @@ from django.utils.http import is_safe_url
 from django.utils.translation import ugettext_lazy as _
 
 import stripe
-# from app.tools.mail import render_to_mail
 from mooch.base import BaseMoocher, csrf_exempt_m, require_POST_m
 from mooch.signals import post_charge
 
@@ -26,6 +25,10 @@ from .models import Customer
 
 
 login_required_m = method_decorator(login_required)
+
+
+def render_to_mail(*args, **kwargs):
+    pass
 
 
 class StripeSubscriptionsMoocher(BaseMoocher):
@@ -383,7 +386,8 @@ class StripeMoocher(BaseMoocher):
                     customer=customer.customer_id,
                     amount=instance.amount_cents,
                     currency=s.currency,
-                    idempotency_key="charge-%s-%s" % (customer.customer_id, instance.amount_cents),
+                    idempotency_key="charge-%s-%s"
+                    % (instance.id.hex, instance.amount_cents),
                 )
             else:
                 # TODO create customer anyway, and stash away the customer ID
@@ -392,7 +396,8 @@ class StripeMoocher(BaseMoocher):
                     source=request.POST["token"],
                     amount=instance.amount_cents,
                     currency=s.currency,
-                    idempotency_key="charge-%s-%s" % (customer.customer_id, instance.amount_cents),
+                    idempotency_key="charge-%s-%s"
+                    % (instance.id.hex, instance.amount_cents),
                 )
 
             # TODO Error handling

@@ -28,7 +28,7 @@ def attempt_using_stripe_customers(payment):
             amount=payment.amount_cents,
             currency=s.currency,
             description=payment.description,
-            idempotency_key=payment.id.hex,
+            idempotency_key="charge-%s-%s" % (payment.id.hex, payment.amount_cents),
         )
 
     except stripe.CardError as exc:
