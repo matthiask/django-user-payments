@@ -106,7 +106,8 @@ class Subscription(models.Model):
         if not self.starts_on:
             self.starts_on = date.today()
         if not self.paid_until or self.paid_until < self.starts_on:
-            # New subscription instance or restarted subscription.
+            # New subscription instance or restarted subscription with
+            # inactivity period.
             self.paid_until = self.starts_on - timedelta(days=1)
         super().save(*args, **kwargs)
 
