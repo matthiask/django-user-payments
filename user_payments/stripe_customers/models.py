@@ -17,21 +17,19 @@ class CustomerManager(models.Manager):
         """
 
         try:
-            customer = user.stripe_customer
+            customer_id = user.stripe_customer.customer_id
         except Customer.DoesNotExist:
-            customer = self.model(user=user)
-            customer.customer = stripe.Customer.create(
-                email=user.email,
-                source=token,
-                expand=["default_source"],
-                idempotency_key="customer-%s" % user.id,
+            obj = stripe.Customer.create(
+                email=user.email, source=token, expand=["default_source"]
             )
+            customer = self.model(user=user, customer_id=obj.id)
+            customer = obj
             customer.save()
 
         else:
-            customer.refresh(save=False)
-            customer.customer.source = token
-            customer.customer = customer.customer.save()
+            obj = stripe.Customer.retrieve(customer_id)
+            obj.source = token
+            obj.save()
             customer.refresh()
 
         return customer
