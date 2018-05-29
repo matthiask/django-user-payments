@@ -9,6 +9,34 @@ from django.utils.translation import ugettext_lazy as _
 import stripe
 
 
+class CustomerManager(models.Manager):
+
+    def with_token(self, *, user, token):
+        """
+        Add or replace a credit card for a given user
+        """
+
+        try:
+            customer = user.stripe_customer
+        except Customer.DoesNotExist:
+            customer = self.model(user=user)
+            customer.customer = stripe.Customer.create(
+                email=user.email,
+                source=token,
+                expand=["default_source"],
+                idempotency_key="customer-%s" % user.id,
+            )
+            customer.save()
+
+        else:
+            customer.refresh(save=False)
+            customer.customer.source = token
+            customer.customer = customer.customer.save(expand=["default_source"])
+            customer.save()
+
+        return customer
+
+
 class Customer(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -20,6 +48,8 @@ class Customer(models.Model):
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
     customer_id = models.CharField(_("customer ID"), max_length=50, unique=True)
     customer_data = models.TextField(_("customer data"), blank=True)
+
+    objects = CustomerManager()
 
     class Meta:
         verbose_name = _("customer")
