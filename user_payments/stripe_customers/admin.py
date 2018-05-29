@@ -45,7 +45,7 @@ class CustomerAdmin(admin.ModelAdmin):
 
     def customer_admin(self, instance):
         return format_html(
-            '<pre>{}</pre>',
+            "<pre>{}</pre>",
             json.dumps(sanitize(instance.customer), sort_keys=True, indent=4),
         )
 
