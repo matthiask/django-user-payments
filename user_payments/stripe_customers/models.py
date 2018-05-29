@@ -25,14 +25,14 @@ class CustomerManager(models.Manager):
             customer = self.model(user=user, customer_id=obj.id)
             customer = obj
             customer.save()
+            return customer
 
         else:
             obj = stripe.Customer.retrieve(customer_id)
             obj.source = token
             obj.save()
-            customer.refresh()
-
-        return customer
+            user.stripe_customer.refresh()
+            return user.stripe_customer
 
 
 class Customer(models.Model):
