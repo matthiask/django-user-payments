@@ -146,7 +146,7 @@ class Subscription(models.Model):
     @property
     def is_active(self):
         s = apps.get_app_config("user_payments").settings
-        return self.starts_at <= timezone.now() <= self.paid_until_at + s.grace_period
+        return timezone.now() <= self.paid_until_at + s.grace_period
 
     @property
     def in_grace_period(self):
