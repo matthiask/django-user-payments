@@ -31,8 +31,8 @@ class CustomerManager(models.Manager):
         else:
             customer.refresh(save=False)
             customer.customer.source = token
-            customer.customer = customer.customer.save(expand=["default_source"])
-            customer.save()
+            customer.customer = customer.customer.save()
+            customer.refresh()
 
         return customer
 
