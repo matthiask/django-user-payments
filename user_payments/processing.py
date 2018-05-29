@@ -1,53 +1,28 @@
 import logging
 
-from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
-from django.utils import timezone
 
-import stripe
-from mooch.signals import post_charge
 from user_payments.models import LineItem, Payment
-from user_payments.stripe_customers.models import Customer
 
 
 logger = logging.getLogger(__name__)
 
 
-def attempt_using_stripe_customers(payment):
-    s = apps.get_app_config("user_payments").settings
+class Processors:
 
-    try:
-        customer = payment.user.stripe_customer
-    except Customer.DoesNotExist:
-        return False
+    def __init__(self):
+        self._processors = []
 
-    try:
-        charge = stripe.Charge.create(
-            customer=customer.customer_id,
-            amount=payment.amount_cents,
-            currency=s.currency,
-            description=payment.description,
-            idempotency_key="charge-%s-%s" % (payment.id.hex, payment.amount_cents),
-        )
+    def add(self, processor, *, priority=0):
+        self._processors.append((-priority, processor))
+        self._processors.sort()
 
-    except stripe.CardError as exc:
-        logger.exception("Failure charging the customers' card")
-        send_mail(str(payment), str(exc), None, [payment.email], fail_silently=True)
-        return False
+    def __iter__(self):
+        return (item[1] for item in self._processors)
 
-    else:
-        payment.payment_service_provider = "user-payments-stripe-customers"
-        payment.charged_at = timezone.now()
-        payment.transaction = str(charge)
-        payment.save()
 
-        # FIXME sender?
-        post_charge.send(
-            sender=attempt_using_stripe_customers, payment=payment, request=None
-        )
-
-        return True
+default_processors = Processors()
 
 
 def send_notification_mail(payment):
@@ -55,7 +30,7 @@ def send_notification_mail(payment):
     send_mail(str(payment), "<No body>", None, [payment.email], fail_silently=True)
 
 
-default_processors = [attempt_using_stripe_customers, send_notification_mail]
+default_processors.add(send_notification_mail, priority=-1)
 
 
 def process_payment(payment, *, processors=default_processors):
