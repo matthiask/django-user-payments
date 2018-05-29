@@ -58,21 +58,6 @@ def send_notification_mail(payment):
 default_processors = [attempt_using_stripe_customers, send_notification_mail]
 
 
-def process_unbound_items(*, processors=default_processors):
-    for user in (
-        get_user_model()
-        .objects.filter(
-            id__in=LineItem.objects.unbound().values("user")  # XXX .unpaid()?
-        )
-        .select_related("stripe_customer")
-    ):
-        # TODO Also process pending payments? Probably not here.
-
-        payment = Payment.objects.create_pending(user=user)
-        if payment:  # pragma: no branch (very unlikely)
-            process_payment(payment, processors=processors)
-
-
 def process_payment(payment, *, processors=default_processors):
     logger.info(
         "Processing: %(payment)s by %(email)s",
@@ -98,3 +83,18 @@ def process_payment(payment, *, processors=default_processors):
             {"payment": payment, "email": payment.email},
         )
         payment.cancel_pending()
+
+
+def process_unbound_items(*, processors=default_processors):
+    for user in (
+        get_user_model()
+        .objects.filter(
+            id__in=LineItem.objects.unbound().values("user")  # XXX .unpaid()?
+        )
+        .select_related("stripe_customer")
+    ):
+        # TODO Also process pending payments? Probably not here.
+
+        payment = Payment.objects.create_pending(user=user)
+        if payment:  # pragma: no branch (very unlikely)
+            process_payment(payment, processors=processors)
