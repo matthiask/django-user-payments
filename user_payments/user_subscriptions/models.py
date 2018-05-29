@@ -22,6 +22,24 @@ class SubscriptionManager(models.Manager):
             user=user, code=code, periodicity=periodicity, amount=amount, **kwargs
         )
 
+    def ensure(self, *, user, code, **kwargs):
+        """
+        Ensure that the user is subscribed to the subscription specified by
+        ``code``. Pass additional fields for the subscription as kwargs.
+
+        If the subscription is still in a paid period this also ensures that
+        new subscription periods aren't created too early.
+        """
+        subscription, created = self.update_or_create(
+            user=user, code=code, defaults=kwargs
+        )
+        if not created:
+            subscription.delete_pending_periods()
+        if subscription.paid_until > date.today():
+            subscription.starts_on = subscription.paid_until + timedelta(days=1)
+            subscription.save()
+        return subscription
+
     def create_periods(self):
         for subscription in self.filter(renew_automatically=True):
             subscription.create_periods()
@@ -192,6 +210,20 @@ class Subscription(models.Model):
         return periods
 
     create_periods.alters_data = True
+
+    def delete_pending_periods(self):
+        for period in self.periods.filter(ends_on__gte=date.today()).select_related(
+            "line_item__payment"
+        ):
+            if period.line_item.payment.charged_at:
+                continue
+            if period.line_item.payment:
+                period.line_item.payment.cancel_pending()
+            if period.line_item:
+                period.line_item.delete()
+            period.delete()
+
+    delete_pending_periods.alters_data = True
 
 
 class SubscriptionPeriodManager(models.Manager):
