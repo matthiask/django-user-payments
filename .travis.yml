@@ -24,7 +24,5 @@ jobs:
       env: REQ=none
       install: skip
       script:
-        - pip install flake8 isort unify
+        - pip install flake8
         - flake8 .
-        - isort --check-only --recursive --diff user_payments tests
-        - unify --check-only --recursive --quote '"' user_payments tests
