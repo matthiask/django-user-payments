@@ -9,7 +9,7 @@ from mooch.models import Payment as AbstractPayment
 
 class PaymentManager(models.Manager):
 
-    def create_pending(self, *, user, **kwargs):
+    def create_pending(self, *, user, lineitems=None, **kwargs):
         """
         Create an unpaid payment instance with all line items for the given
         user that have not been bound to a payment instance yet.
@@ -17,14 +17,15 @@ class PaymentManager(models.Manager):
         Returns ``None`` if there are no unbound line items for the given user.
         """
         with transaction.atomic():
-            pending = user.user_lineitems.unbound()  # XXX .unpaid()?
-            if not len(pending):
+            if lineitems is None:
+                lineitems = user.user_lineitems.unbound()  # XXX .unpaid()?
+            if not len(lineitems):
                 return None
 
             payment = self.create(
-                user=user, amount=sum((item.amount for item in pending), 0), **kwargs
+                user=user, amount=sum((item.amount for item in lineitems), 0), **kwargs
             )
-            pending.update(payment=payment)
+            lineitems.update(payment=payment)
             return payment
 
 
