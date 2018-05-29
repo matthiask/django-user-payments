@@ -14,6 +14,19 @@ from .utils import recurring
 
 class SubscriptionManager(models.Manager):
 
+    def create(self, *, user, code, title, periodicity, amount, **kwargs):
+        """
+        Make it a ``TypeError`` to forget fields.
+        """
+        return super().create(
+            user=user,
+            code=code,
+            title=title,
+            periodicity=periodicity,
+            amount=amount,
+            **kwargs
+        )
+
     def create_periods(self):
         for subscription in self.filter(renew_automatically=True):
             subscription.create_periods()
