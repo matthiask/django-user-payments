@@ -8,6 +8,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_display = (
         "user",
         "title",
+        "code",
         "starts_on",
         "ends_on",
         "periodicity",
