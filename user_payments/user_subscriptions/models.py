@@ -14,17 +14,12 @@ from .utils import recurring
 
 class SubscriptionManager(models.Manager):
 
-    def create(self, *, user, code, title, periodicity, amount, **kwargs):
+    def create(self, *, user, code, periodicity, amount, **kwargs):
         """
         Make it a ``TypeError`` to forget fields.
         """
         return super().create(
-            user=user,
-            code=code,
-            title=title,
-            periodicity=periodicity,
-            amount=amount,
-            **kwargs
+            user=user, code=code, periodicity=periodicity, amount=amount, **kwargs
         )
 
     def create_periods(self):
