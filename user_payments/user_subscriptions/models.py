@@ -129,6 +129,11 @@ class Subscription(models.Model):
             self.paid_until = self.starts_on - timedelta(days=1)
         super().save(*args, **kwargs)
 
+        # Update unbound line items with new amount.
+        LineItem.objects.unbound().filter(subscriptionperiod__subscription=self).update(
+            amount=self.amount
+        )
+
     save.alters_data = True
 
     def update_paid_until(self, save=True):

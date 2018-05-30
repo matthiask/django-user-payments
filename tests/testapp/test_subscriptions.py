@@ -186,3 +186,22 @@ class Test(TestCase):
         self.assertEqual(Subscription.objects.count(), 1)
         # Periods are NOT automatically created when updating subscriptions
         self.assertEqual(SubscriptionPeriod.objects.count(), 0)
+
+    def test_unbound_amount_change(self):
+        subscription = Subscription.objects.create(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+        )
+        period = subscription.create_periods()[-1]
+        period.create_line_item()
+
+        self.assertEqual(period.line_item.amount, 60)
+
+        subscription.amount = 100
+        subscription.save()
+
+        period.line_item.refresh_from_db()
+        self.assertEqual(period.line_item.amount, 100)
