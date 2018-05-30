@@ -7,7 +7,6 @@ from user_payments.user_subscriptions.utils import next_valid_day, recurring
 
 
 class Test(TestCase):
-
     def test_next_valid_day(self):
         self.assertEqual(next_valid_day(2016, 2, 28), date(2016, 2, 28))
         self.assertEqual(next_valid_day(2016, 2, 29), date(2016, 2, 29))

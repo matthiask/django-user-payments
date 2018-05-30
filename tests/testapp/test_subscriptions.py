@@ -10,7 +10,6 @@ from user_payments.user_subscriptions.models import Subscription, SubscriptionPe
 
 
 class Test(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_superuser("admin", "admin@test.ch", "blabla")
         deactivate_all()

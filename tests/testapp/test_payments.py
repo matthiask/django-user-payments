@@ -7,7 +7,6 @@ from user_payments.models import LineItem, Payment
 
 
 class Test(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_superuser("admin", "admin@test.ch", "blabla")
         deactivate_all()

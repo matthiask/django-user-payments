@@ -8,7 +8,6 @@ from mooch.models import Payment as AbstractPayment
 
 
 class PaymentManager(models.Manager):
-
     def create_pending(self, *, user, lineitems=None, **kwargs):
         """
         Create an unpaid payment instance with all line items for the given
@@ -68,7 +67,6 @@ class Payment(AbstractPayment):
 
 
 class LineItemQuerySet(models.QuerySet):
-
     def unbound(self):
         return self.filter(payment__isnull=True)
 

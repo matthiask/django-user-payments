@@ -18,7 +18,6 @@ class AttrDict(dict):
 
 
 class Test(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_superuser("admin", "admin@test.ch", "blabla")
         self.moocher = StripeMoocher(
@@ -71,7 +70,6 @@ class Test(TestCase):
         request.user = AnonymousUser()
 
         class Messages(list):
-
             def add(self, *args):
                 self.append(args)
 

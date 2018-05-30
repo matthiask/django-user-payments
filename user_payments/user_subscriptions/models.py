@@ -13,7 +13,6 @@ from .utils import recurring
 
 
 class SubscriptionManager(models.Manager):
-
     def create(self, *, user, code, periodicity, amount, **kwargs):
         """
         Make it a ``TypeError`` to forget fields.
@@ -78,6 +77,7 @@ class Subscription(models.Model):
             period.create_line_item()
         first_payment = Payment.objects.create_pending(user=user)
     """
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
@@ -227,7 +227,6 @@ class Subscription(models.Model):
 
 
 class SubscriptionPeriodManager(models.Manager):
-
     def paid(self):
         """
         Return subscription periods that have been paid for.

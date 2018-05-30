@@ -12,7 +12,6 @@ from user_payments.stripe_customers.models import Customer
 
 
 class Test(TestCase):
-
     def setUp(self):
         self.user = User.objects.create_superuser("admin", "admin@test.ch", "blabla")
         deactivate_all()

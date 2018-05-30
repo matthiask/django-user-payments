@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class Processors:
-
     def __init__(self):
         self._processors = []
 

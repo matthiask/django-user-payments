@@ -12,7 +12,6 @@ from user_payments.stripe_customers.models import Customer
 
 
 class Test(TestCase):
-
     def setUp(self):
         deactivate_all()
 

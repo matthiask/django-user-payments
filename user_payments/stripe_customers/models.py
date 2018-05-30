@@ -10,7 +10,6 @@ import stripe
 
 
 class CustomerManager(models.Manager):
-
     def with_token(self, *, user, token):
         """
         Add or replace a credit card for a given user
