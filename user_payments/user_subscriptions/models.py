@@ -137,12 +137,13 @@ class Subscription(models.Model):
     save.alters_data = True
 
     def update_paid_until(self, save=True):
-        # TODO call this from somewhere...
         self.paid_until = (
             self.periods.paid().aggregate(m=Max("ends_on"))["m"] or self.paid_until
         )
         if save:
             self.save()
+
+    update_paid_until.alters_data = True
 
     @property
     def starts_at(self):
