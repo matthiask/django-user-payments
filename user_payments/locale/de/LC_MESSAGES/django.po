@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-05-18 08:13+0000\n"
+"POT-Creation-Date: 2018-05-31 09:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,157 +18,163 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps.py:8
+#: apps.py:11
 msgid "user payments"
 msgstr "Benutzer-Zahlungen"
 
-#: models.py:36 models.py:76 stripe_customers/models.py:15
-#: user_subscriptions/models.py:26
+#: models.py:38 models.py:103 stripe_customers/models.py:41
+#: user_subscriptions/models.py:85
 msgid "user"
 msgstr "Benutzer"
 
-#: models.py:43
+#: models.py:45
 #, python-format
 msgid "Payment of %s"
 msgstr "Zahlung über %s"
 
-#: models.py:44
+#: models.py:46
 #, python-format
 msgid "Pending payment of %s"
 msgstr "Pendente Zahlung über %s"
 
-#: models.py:78 stripe_customers/models.py:18 user_subscriptions/models.py:28
+#: models.py:105 stripe_customers/models.py:44 user_subscriptions/models.py:94
 msgid "created at"
 msgstr "erstellt um"
 
-#: models.py:79 user_subscriptions/models.py:29
+#: models.py:106 user_subscriptions/models.py:95
 msgid "title"
 msgstr "Titel"
 
-#: models.py:80 user_subscriptions/models.py:42
+#: models.py:107 user_subscriptions/models.py:108
 msgid "amount"
 msgstr "Betrag"
 
-#: models.py:88
+#: models.py:115
 msgid "payment"
 msgstr "Zahlung"
 
-#: models.py:93 user_subscriptions/models.py:139
+#: models.py:122 user_subscriptions/models.py:273
 msgid "line item"
 msgstr "Einzelposten"
 
-#: models.py:94
+#: models.py:123
 msgid "line items"
 msgstr "Einzelposten"
 
-#: stripe_customers/admin.py:50 stripe_customers/models.py:20
+#: stripe_customers/admin.py:44 stripe_customers/models.py:46
 msgid "customer ID"
 msgstr "Kunden-Nr."
 
-#: stripe_customers/admin.py:58 stripe_customers/models.py:21
-#: stripe_customers/models.py:24
+#: stripe_customers/admin.py:52 stripe_customers/models.py:52
 msgid "customer"
 msgstr "Kunde"
 
-#: stripe_customers/apps.py:11
+#: stripe_customers/apps.py:12
 msgid "stripe customers"
 msgstr "Stripe-Kunden"
 
-#: stripe_customers/models.py:19
+#: stripe_customers/models.py:45
 msgid "updated at"
 msgstr "aktualisiert um"
 
-#: stripe_customers/models.py:25
+#: stripe_customers/models.py:47
+msgid "customer data"
+msgstr "Kundendaten"
+
+#: stripe_customers/models.py:53
 msgid "customers"
 msgstr "Kunden"
 
-#: stripe_customers/moocher.py:33
-msgid "Subscribe using credit card"
-msgstr "Mit Kreditkarte abonnieren"
+#: stripe_customers/moochers.py:21
+msgid "Pay with Stripe"
+msgstr "Mit Stripe bezahlen"
 
-#: stripe_customers/moocher.py:151 stripe_customers/moocher.py:272
-#: stripe_customers/moocher.py:416
+#: stripe_customers/moochers.py:127
 #, python-format
 msgid "Card error: %s"
 msgstr "Kartenfehler: %s"
 
-#: stripe_customers/moocher.py:151 stripe_customers/moocher.py:272
-#: stripe_customers/moocher.py:416
+#: stripe_customers/moochers.py:127
 msgid "No details"
 msgstr "Keine Details"
-
-#: stripe_customers/moocher.py:260
-msgid "Card has been added successfully."
-msgstr "Kreditkarte wurde erfolgreich hinzugefügt. "
-
-#: stripe_customers/moocher.py:268
-msgid "Card has been replaced successfully."
-msgstr "Kreditkarte wurde erfolgreich ersetzt."
-
-#: stripe_customers/moocher.py:299
-msgid "Subscription will be canceled at period end."
-msgstr "Abonnement wird nach Periodenende gekündigt."
-
-#: stripe_customers/moocher.py:302
-msgid "Subscription could not be found!"
-msgstr "Abonnement konnte nicht gefunden werden!"
-
-#: stripe_customers/moocher.py:309
-msgid "Pay with Stripe"
-msgstr "Mit Stripe bezahlen"
 
 #: user_subscriptions/apps.py:8
 msgid "user subscriptions"
 msgstr "Benutzer-Abonnemente"
 
-#: user_subscriptions/models.py:30 user_subscriptions/models.py:132
-msgid "starts at"
-msgstr "startet um"
+#: user_subscriptions/models.py:88
+msgid "code"
+msgstr "Code"
 
-#: user_subscriptions/models.py:31 user_subscriptions/models.py:133
-msgid "ends at"
-msgstr "endet um"
+#: user_subscriptions/models.py:91
+msgid "Codes must be unique per user. Allows identifying the subscription."
+msgstr ""
+"Code muss pro Benutzer eindeutig sein. Erlaubt es, das Abonnement zu "
+"identifizieren."
 
-#: user_subscriptions/models.py:33
+#: user_subscriptions/models.py:96 user_subscriptions/models.py:266
+msgid "starts on"
+msgstr "startet am"
+
+#: user_subscriptions/models.py:97 user_subscriptions/models.py:267
+msgid "ends on"
+msgstr "endet am"
+
+#: user_subscriptions/models.py:99
 msgid "periodicity"
 msgstr "Periodizität"
 
-#: user_subscriptions/models.py:36
+#: user_subscriptions/models.py:102
 msgid "yearly"
 msgstr "jährlich"
 
-#: user_subscriptions/models.py:37
+#: user_subscriptions/models.py:103
 msgid "monthly"
 msgstr "monatlich"
 
-#: user_subscriptions/models.py:38
+#: user_subscriptions/models.py:104
 msgid "weekly"
 msgstr "wöchentlich"
 
-#: user_subscriptions/models.py:39
+#: user_subscriptions/models.py:105
 msgid "manually"
 msgstr "manuell"
 
-#: user_subscriptions/models.py:44
+#: user_subscriptions/models.py:110
 msgid "renew automatically"
 msgstr "automatisch erneuern"
 
-#: user_subscriptions/models.py:45
+#: user_subscriptions/models.py:111
 msgid "paid until"
 msgstr "bezahlt bis"
 
-#: user_subscriptions/models.py:50 user_subscriptions/models.py:130
+#: user_subscriptions/models.py:117 user_subscriptions/models.py:264
 msgid "subscription"
 msgstr "Abonnement"
 
-#: user_subscriptions/models.py:51
+#: user_subscriptions/models.py:118
 msgid "subscriptions"
 msgstr "Abonnemente"
 
-#: user_subscriptions/models.py:146
+#: user_subscriptions/models.py:280
 msgid "subscription period"
 msgstr "Abonnementsperiode"
 
-#: user_subscriptions/models.py:147
+#: user_subscriptions/models.py:281
 msgid "subscription periods"
 msgstr "Abonnementsperioden"
+
+#~ msgid "Subscribe using credit card"
+#~ msgstr "Mit Kreditkarte abonnieren"
+
+#~ msgid "Card has been added successfully."
+#~ msgstr "Kreditkarte wurde erfolgreich hinzugefügt. "
+
+#~ msgid "Card has been replaced successfully."
+#~ msgstr "Kreditkarte wurde erfolgreich ersetzt."
+
+#~ msgid "Subscription will be canceled at period end."
+#~ msgstr "Abonnement wird nach Periodenende gekündigt."
+
+#~ msgid "Subscription could not be found!"
+#~ msgstr "Abonnement konnte nicht gefunden werden!"
