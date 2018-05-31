@@ -255,3 +255,29 @@ class Test(TestCase):
         self.assertEqual(subscription.periodicity, "yearly")
         # starts_on is automatically moved after the paid_until value
         self.assertTrue(subscription.starts_on, paid_until + timedelta(days=1))
+
+    def test_update_paid_until(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date(2018, 1, 1),
+        )
+
+        period = subscription.create_periods()[0]
+        period.create_line_item()
+        Payment.objects.create_pending(user=self.user)
+
+        # No post_save signal:
+        Payment.objects.update(charged_at=timezone.now())
+
+        subscription.update_paid_until(save=False)
+        self.assertEqual(subscription.paid_until, date(2018, 1, 31))
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.paid_until, date(2017, 12, 31))
+
+        Payment.objects.get().save()
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.paid_until, date(2018, 1, 31))
