@@ -3,11 +3,11 @@ from datetime import date, datetime, time, timedelta
 from django.apps import apps
 from django.conf import settings
 from django.db import models
-from django.db.models import Max
+from django.db.models import Max, signals
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from user_payments.models import LineItem
+from user_payments.models import LineItem, Payment
 
 from .utils import recurring
 
@@ -227,6 +227,18 @@ class Subscription(models.Model):
             period.delete()
 
     delete_pending_periods.alters_data = True
+
+
+def payment_changed(sender, instance, **kwargs):
+    affected = SubscriptionPeriod.objects.filter(line_item__payment=instance.pk).values(
+        "subscription"
+    )
+    for subscription in Subscription.objects.filter(pk__in=affected):
+        subscription.update_paid_until()
+
+
+signals.post_save.connect(payment_changed, sender=Payment)
+signals.post_delete.connect(payment_changed, sender=Payment)
 
 
 class SubscriptionPeriodManager(models.Manager):

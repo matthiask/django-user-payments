@@ -57,9 +57,6 @@ class Test(TestCase):
         payment.save()
 
         subscription.refresh_from_db()
-        self.assertEqual(subscription.paid_until, date(2039, 12, 31))
-
-        subscription.update_paid_until(save=False)  # XXX call automatically?
         self.assertEqual(subscription.paid_until, date(2040, 3, 31))
 
         subscription.update_paid_until()
@@ -248,7 +245,7 @@ class Test(TestCase):
         payment.charged_at = timezone.now()
         payment.save()
 
-        subscription.update_paid_until()  # TODO automatic?
+        subscription.refresh_from_db()
         paid_until = subscription.paid_until
         self.assertTrue(paid_until > date.today() + timedelta(days=10))
 
