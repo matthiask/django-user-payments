@@ -7,6 +7,11 @@ from django.utils.translation import gettext, gettext_lazy as _
 from mooch.models import Payment as AbstractPayment
 
 
+class PaymentQuerySet(models.QuerySet):
+    def pending(self):
+        return self.filter(charged_at__isnull=True)
+
+
 class PaymentManager(models.Manager):
     def create_pending(self, *, user, lineitems=None, **kwargs):
         """
@@ -17,7 +22,7 @@ class PaymentManager(models.Manager):
         """
         with transaction.atomic():
             if lineitems is None:
-                lineitems = user.user_lineitems.unbound()  # XXX .unpaid()?
+                lineitems = user.user_lineitems.unbound()
             else:
                 lineitems = LineItem.objects.filter(pk__in=[i.pk for i in lineitems])
             if not len(lineitems):
@@ -38,7 +43,7 @@ class Payment(AbstractPayment):
         verbose_name=_("user"),
     )
 
-    objects = PaymentManager()
+    objects = PaymentManager.from_queryset(PaymentQuerySet)()
 
     def __str__(self):
         if self.charged_at:

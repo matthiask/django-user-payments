@@ -1,8 +1,9 @@
 import logging
 
 from django.core.management.base import BaseCommand
+from django.db import transaction
 
-from user_payments.processing import process_unbound_items
+from user_payments.processing import process_unbound_items, process_pending_payments
 
 
 class Command(BaseCommand):
@@ -15,4 +16,6 @@ class Command(BaseCommand):
         handler.setLevel(logging.DEBUG)
         logger.addHandler(handler)
 
-        process_unbound_items()
+        with transaction.atomic():
+            process_unbound_items()
+            process_pending_payments()
