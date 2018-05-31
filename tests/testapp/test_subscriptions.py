@@ -28,6 +28,7 @@ class Test(TestCase):
             amount=60,
             starts_on=date(2040, 1, 1),
         )
+        self.assertEqual(subscription.starts_at.date(), date(2040, 1, 1))
         self.assertEqual(subscription.ends_at, None)
 
         self.assertEqual(SubscriptionPeriod.objects.count(), 0)
@@ -219,8 +220,14 @@ class Test(TestCase):
         self.assertEqual(subscription.starts_on, date(2018, 1, 1))
         self.assertEqual(subscription.paid_until, date(2017, 12, 31))
 
-        subscription.create_periods()
+        periods = subscription.create_periods()
         self.assertNotEqual(subscription.periods.count(), 0)
+
+        # Unpaid
+        periods[0].create_line_item()
+        Payment.objects.create_pending(user=self.user, lineitems=[periods[0].line_item])
+        # Unbound
+        periods[1].create_line_item()
 
         subscription = Subscription.objects.ensure(
             user=self.user,
