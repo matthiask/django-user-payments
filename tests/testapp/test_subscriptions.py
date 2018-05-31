@@ -110,7 +110,11 @@ class Test(TestCase):
 
         # Exactly one period
         period, = subscription.create_periods(until=subscription.starts_on)
+        self.assertEqual(LineItem.objects.count(), 0)
         period.create_line_item()
+        self.assertEqual(LineItem.objects.count(), 1)
+        period.create_line_item()
+        self.assertEqual(LineItem.objects.count(), 1)
         payment = Payment.objects.create_pending(user=self.user)
         payment.charged_at = timezone.now()
         payment.save()
