@@ -289,11 +289,12 @@ class SubscriptionPeriod(models.Model):
         """
         # TODO Maybe create periods and line items early,
         # e.g. 7 days before new period begins?
-        self.line_item = LineItem.objects.create(
-            user=self.subscription.user,
-            title=str(self),
-            amount=self.subscription.amount,
-        )
-        self.save()
+        if not self.line_item:
+            self.line_item = LineItem.objects.create(
+                user=self.subscription.user,
+                title=str(self),
+                amount=self.subscription.amount,
+            )
+            self.save()
 
     create_line_item.alters_data = True
