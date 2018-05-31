@@ -217,14 +217,12 @@ class Subscription(models.Model):
     create_periods.alters_data = True
 
     def delete_pending_periods(self):
-        for period in self.periods.filter(ends_on__gte=date.today()).select_related(
-            "line_item__payment"
-        ):
-            if period.line_item.payment.charged_at:
-                continue
-            if period.line_item.payment:
-                period.line_item.payment.cancel_pending()
+        for period in self.periods.select_related("line_item__payment"):
             if period.line_item:
+                if period.line_item.payment:
+                    if period.line_item.payment.charged_at:
+                        continue
+                    period.line_item.payment.cancel_pending()
                 period.line_item.delete()
             period.delete()
 

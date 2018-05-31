@@ -205,3 +205,55 @@ class Test(TestCase):
 
         period.line_item.refresh_from_db()
         self.assertEqual(period.line_item.amount, 100)
+
+    def test_ensure(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date(2018, 1, 1),
+        )
+
+        self.assertEqual(subscription.starts_on, date(2018, 1, 1))
+        self.assertEqual(subscription.paid_until, date(2017, 12, 31))
+
+        subscription.create_periods()
+        self.assertNotEqual(subscription.periods.count(), 0)
+
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date.today(),
+        )
+
+        # Pending periods have been removed
+        self.assertEqual(subscription.periods.count(), 0)
+
+        # Pay for a period...
+        period = subscription.create_periods()[-1]
+        period.create_line_item()
+        payment = Payment.objects.create_pending(user=self.user)
+        payment.charged_at = timezone.now()
+        payment.save()
+
+        subscription.update_paid_until()  # TODO automatic?
+        paid_until = subscription.paid_until
+        self.assertTrue(paid_until > date.today() + timedelta(days=10))
+
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="yearly",
+            amount=720,
+            starts_on=date.today() + timedelta(days=10),
+        )
+
+        self.assertEqual(subscription.periodicity, "yearly")
+        # starts_on is automatically moved after the paid_until value
+        self.assertTrue(subscription.starts_on, paid_until + timedelta(days=1))
