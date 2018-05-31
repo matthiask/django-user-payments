@@ -52,3 +52,11 @@ class Test(TestCase):
         self.assertEqual(LineItem.objects.unbound().count(), 0)
         self.assertEqual(LineItem.objects.unpaid().count(), 0)
         self.assertEqual(str(payment), "Payment of 5.00")
+
+    def test_explicit_lineitems(self):
+        LineItem.objects.create(user=self.user, amount=5, title="Something")
+        item = LineItem.objects.create(user=self.user, amount=5, title="Something")
+
+        payment = Payment.objects.create_pending(user=self.user, lineitems=[item])
+        self.assertEqual(payment.amount, 5)
+        self.assertEqual(LineItem.objects.unbound().count(), 1)

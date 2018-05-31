@@ -18,6 +18,8 @@ class PaymentManager(models.Manager):
         with transaction.atomic():
             if lineitems is None:
                 lineitems = user.user_lineitems.unbound()  # XXX .unpaid()?
+            else:
+                lineitems = LineItem.objects.filter(pk__in=[i.pk for i in lineitems])
             if not len(lineitems):
                 return None
 
