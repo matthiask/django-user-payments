@@ -11,10 +11,28 @@ import stripe
 from user_payments.stripe_customers.models import Customer
 
 
+class AttrDict(dict):
+    """Dictionary which also allows attribute access to its items"""
+
+    def __getattr__(self, key):
+        return self[key]
+
+    def save(self):
+        # stripe.Customer.save()
+        pass
+
+
 class Test(TestCase):
     def setUp(self):
         self.user = User.objects.create_superuser("admin", "admin@test.ch", "blabla")
         deactivate_all()
+
+    @property
+    def data(self):
+        with open(
+            os.path.join(settings.BASE_DIR, "customer.json"), encoding="utf-8"
+        ) as f:
+            return AttrDict(json.load(f))
 
     def login(self):
         client = Client()
@@ -22,12 +40,7 @@ class Test(TestCase):
         return client
 
     def test_model(self):
-        with open(
-            os.path.join(settings.BASE_DIR, "customer.json"), encoding="utf-8"
-        ) as f:
-            data = json.load(f)
-
-        with mock.patch.object(stripe.Customer, "retrieve", return_value=data):
+        with mock.patch.object(stripe.Customer, "retrieve", return_value=self.data):
             customer = Customer.objects.create(
                 customer_id="cus_BdO5X6Bj123456", user=self.user
             )
@@ -82,3 +95,17 @@ class Test(TestCase):
     def test_nocrash(self):
         customer = Customer()
         self.assertEqual(customer.active_subscriptions, {})
+
+    def test_with_token_create(self):
+        with mock.patch.object(stripe.Customer, "create", return_value=self.data):
+            customer = Customer.objects.with_token(user=self.user, token="bla")
+        self.assertEqual(customer.customer_id, "cus_BdO5X6Bj123456")
+
+    def test_with_token_update(self):
+        with mock.patch.object(stripe.Customer, "retrieve", return_value=self.data):
+            c1 = Customer.objects.create(
+                user=self.user, customer_id="cus_BdO5X6Bj123456"
+            )
+            customer = Customer.objects.with_token(user=self.user, token="bla")
+        self.assertEqual(customer.customer_id, "cus_BdO5X6Bj123456")
+        self.assertEqual(c1.pk, customer.pk)

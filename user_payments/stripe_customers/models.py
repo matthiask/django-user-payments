@@ -22,7 +22,7 @@ class CustomerManager(models.Manager):
                 email=user.email, source=token, expand=["default_source"]
             )
             customer = self.model(user=user, customer_id=obj.id)
-            customer = obj
+            customer.customer = obj
             customer.save()
             return customer
 
