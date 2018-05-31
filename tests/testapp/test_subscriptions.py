@@ -59,10 +59,6 @@ class Test(TestCase):
         subscription.refresh_from_db()
         self.assertEqual(subscription.paid_until, date(2040, 3, 31))
 
-        subscription.update_paid_until()
-        subscription.refresh_from_db()
-        self.assertEqual(subscription.paid_until, date(2040, 3, 31))
-
     def test_starts_on(self):
         subscription = Subscription.objects.create(
             user=self.user,
@@ -118,8 +114,6 @@ class Test(TestCase):
         payment = Payment.objects.create_pending(user=self.user)
         payment.charged_at = timezone.now()
         payment.save()
-
-        subscription.update_paid_until()
 
         self.assertEqual(
             Subscription.objects.filter(renew_automatically=True).count(), 1
