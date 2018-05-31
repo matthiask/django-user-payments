@@ -129,11 +129,10 @@ class Test(TestCase):
         subscription.starts_on = date.today()
         subscription.save()
 
-        # Exactl
         periods = subscription.create_periods()
-
+        self.assertEqual([p.starts_on for p in periods], [date.today()])
         self.assertEqual(
-            [p.starts_on for p in periods],
+            [p.starts_on for p in subscription.periods.all()],
             [date.today() - timedelta(days=30), date.today()],
         )
 

@@ -193,10 +193,10 @@ class Subscription(models.Model):
         days = recurring(self.starts_on, self.periodicity)
         this_start = next(days)
 
-        periods = list(self.periods.all())
+        existing = set(self.periods.values_list("starts_on", flat=True))
+        periods = []
 
         if this_start <= end:
-            existing = set(p.starts_on for p in periods)
             while True:
                 next_start = next(days)
                 if this_start not in existing:
