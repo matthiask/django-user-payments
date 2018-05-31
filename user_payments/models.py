@@ -21,17 +21,16 @@ class PaymentManager(models.Manager):
         Returns ``None`` if there are no unbound line items for the given user.
         """
         with transaction.atomic():
-            if lineitems is None:
-                lineitems = user.user_lineitems.unbound()
-            else:
-                lineitems = LineItem.objects.filter(pk__in=[i.pk for i in lineitems])
-            if not len(lineitems):
+            items = user.user_lineitems.unbound()
+            if lineitems is not None:
+                items = items.filter(pk__in=[i.pk for i in lineitems])
+            if not len(items):
                 return None
 
             payment = self.create(
-                user=user, amount=sum((item.amount for item in lineitems), 0), **kwargs
+                user=user, amount=sum((item.amount for item in items), 0), **kwargs
             )
-            lineitems.update(payment=payment)
+            items.update(payment=payment)
             return payment
 
 
