@@ -1,6 +1,7 @@
 from unittest import mock
 
 from django.contrib.auth.models import AnonymousUser, User
+from django.core.exceptions import ImproperlyConfigured
 from django.test import RequestFactory, TestCase
 from django.utils.translation import deactivate_all
 
@@ -8,6 +9,8 @@ import stripe
 from user_payments.models import Payment
 from user_payments.stripe_customers.models import Customer
 from user_payments.stripe_customers.moochers import StripeMoocher
+
+from testapp.moochers import moochers
 
 
 class AttrDict(dict):
@@ -20,11 +23,18 @@ class AttrDict(dict):
 class Test(TestCase):
     def setUp(self):
         self.user = User.objects.create_superuser("admin", "admin@test.ch", "blabla")
-        self.moocher = StripeMoocher(
-            model=Payment, publishable_key="pk", secret_key="sk"
-        )
+        self.moocher = moochers["stripe"]
         self.rf = RequestFactory()
         deactivate_all()
+
+    def test_invalid_moocher(self):
+        with self.assertRaises(ImproperlyConfigured):
+            StripeMoocher(model=Payment, publishable_key=None, secret_key=None)
+
+    def test_moocher_form(self):
+        payment = Payment.objects.create(user=self.user, amount=10)
+        payment_form = self.moocher.payment_form(self.rf.get("/"), payment)
+        self.assertIn(payment.id.hex, payment_form)
 
     def test_moocher(self):
         payment = Payment.objects.create(user=self.user, amount=10)
