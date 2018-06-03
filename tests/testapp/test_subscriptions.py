@@ -59,6 +59,9 @@ class Test(TestCase):
         subscription.refresh_from_db()
         self.assertEqual(subscription.paid_until, date(2040, 3, 31))
 
+        self.assertEqual(self.user.user_subscriptions.for_code("test1"), subscription)
+        self.assertEqual(self.user.user_subscriptions.for_code("something"), None)
+
     def test_starts_on(self):
         subscription = Subscription.objects.create(
             user=self.user,

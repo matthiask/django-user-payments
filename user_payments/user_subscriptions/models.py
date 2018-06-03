@@ -12,6 +12,14 @@ from user_payments.models import LineItem, Payment
 from .utils import recurring
 
 
+class SubscriptionQuerySet(models.QuerySet):
+    def for_code(self, code):
+        try:
+            return self.get(code=code)
+        except self.model.DoesNotExist:
+            return None
+
+
 class SubscriptionManager(models.Manager):
     def create(self, *, user, code, periodicity, amount, **kwargs):
         """
@@ -110,7 +118,7 @@ class Subscription(models.Model):
     renew_automatically = models.BooleanField(_("renew automatically"), default=True)
     paid_until = models.DateField(_("paid until"), blank=True)
 
-    objects = SubscriptionManager()
+    objects = SubscriptionManager.from_queryset(SubscriptionQuerySet)()
 
     class Meta:
         unique_together = (("user", "code"),)
