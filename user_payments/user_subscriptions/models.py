@@ -177,16 +177,18 @@ class Subscription(models.Model):
         )
 
     @property
+    def grace_period_ends_at(self):
+        s = apps.get_app_config("user_payments").settings
+        return self.paid_until_at + s.grace_period
+
+    @property
     def is_active(self):
         s = apps.get_app_config("user_payments").settings
         return timezone.now() <= self.paid_until_at + s.grace_period
 
     @property
     def in_grace_period(self):
-        s = apps.get_app_config("user_payments").settings
-        return (
-            self.paid_until_at <= timezone.now() <= self.paid_until_at + s.grace_period
-        )
+        return self.paid_until_at <= timezone.now() <= self.grace_period_ends_at
 
     def create_periods(self, *, until=None):
         """
