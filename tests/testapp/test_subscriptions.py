@@ -67,13 +67,24 @@ class Test(TestCase):
             user=self.user,
             code="test2",
             title="Test subscription 2",
-            periodicity="whatever",
+            periodicity="yearly",
             amount=0,
         )
         self.assertEqual(subscription.starts_on, date.today())
 
         self.assertTrue(subscription.is_active)
         self.assertTrue(subscription.in_grace_period)
+
+        period = subscription.create_periods()[-1]
+        period.create_line_item()
+        payment = Payment.objects.create_pending(user=self.user)
+        payment.charged_at = timezone.now()
+        payment.save()
+
+        subscription.refresh_from_db()
+
+        self.assertTrue(subscription.is_active)
+        self.assertFalse(subscription.in_grace_period)
 
     def test_ends_on(self):
         subscription = Subscription.objects.create(
