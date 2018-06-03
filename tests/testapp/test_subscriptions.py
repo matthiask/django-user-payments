@@ -154,6 +154,31 @@ class Test(TestCase):
             [date.today() - timedelta(days=30), date.today()],
         )
 
+    def test_manager_create_periods(self):
+        Subscription.objects.ensure(
+            user=self.user,
+            code="sub1",
+            periodicity="weekly",
+            amount=10,
+            renew_automatically=True,  # The default, therefore redundant
+        )
+        Subscription.objects.ensure(
+            user=self.user,
+            code="sub2",
+            periodicity="weekly",
+            amount=10,
+            renew_automatically=False,
+        )
+
+        Subscription.objects.create_periods()
+
+        self.assertEqual(
+            list(
+                SubscriptionPeriod.objects.values_list("subscription__code", flat=True)
+            ),
+            ["sub1"],
+        )
+
     def test_admin_create(self):
         client = self.login()
         response = client.post(
