@@ -11,7 +11,7 @@ class UserPayments(AppConfig):
     verbose_name = capfirst(_("user payments"))
     default_settings = {
         "currency": "CHF",
-        "grace_period": timedelta(days=3),
+        "grace_period": timedelta(days=7),
         "disable_autorenewal_after": timedelta(days=15),
     }
 
