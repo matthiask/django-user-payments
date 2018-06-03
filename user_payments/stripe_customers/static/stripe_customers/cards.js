@@ -29,9 +29,12 @@
 
   form.addEventListener('submit', function(event) {
     event.preventDefault();
+    form.querySelector('button[type="submit"]').disabled = true;
+
     stripe.createToken(card).then(function(result) {
       if (result.error) {
         document.getElementById('card-errors').textContent = result.error.message;
+        form.querySelector('button[type="submit"]').disabled = false;
       } else {
         var input = document.createElement('input');
         input.setAttribute('type', 'hidden');

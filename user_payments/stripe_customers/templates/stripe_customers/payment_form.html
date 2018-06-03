@@ -15,29 +15,15 @@
 
 {% else %}
 
-  <form method="post" action="{{ charge_url }}" id="card-form"
-      data-publishable-key="{{ publishable_key }}">
+  <form method="post" action="{{ charge_url }}" data-publishable-key="{{ publishable_key }}">
     {% csrf_token %}
     <input type="hidden" name="id" value="{{ payment.id.hex }}">
-
-    <div class="row">
-      <div class="small-12 columns">
-        <h4>{{ moocher.title }}</h4>
-        <div id="card-element"></div>
-        <div id="card-errors" role="alert">&nbsp;</div>
-        <div class="payment__checkbox">
-        <input type="checkbox" required>
-        <label>Ich akzeptiere die <a href="/impressum/" target="_blank">AGB</a></label>
-      </div>
-      {# <button type="submit" href="{% url 'signup:thanks' %}">Zahlen</button> #}
-      </div>
-      <div class="small-12 large-6 columns">
-
-
-
-      </div>
+    <strong>{{ moocher.title }}</strong>
+    <div id="card-element"></div>
+    <div style="padding-top:8px;display:flex">
+      <button type="submit" class="button" style="flex-grow:0;margin:-2px 10px 0 0">Zahlen</button>
+      <div id="card-errors" role="alert"></div>
     </div>
-
   </form>
 
   <script src="https://js.stripe.com/v3/"></script>
