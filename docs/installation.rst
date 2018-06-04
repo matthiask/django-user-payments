@@ -6,7 +6,7 @@ The prerequisites for django-user-payments are:
 - Django 1.11 or better
 - Python 3.5 or better (3.4 may work, but is not tested)
 - `django-mooch <https://github.com/matthiask/django-mooch>`_
-  (automatically installed)
+  (installed as a dependency)
 
 To install the package, start with installing the package using pip:
 
