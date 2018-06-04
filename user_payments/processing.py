@@ -63,7 +63,7 @@ def process_payment(payment, *, processors=None, cancel_on_failure=True):
                     },
                 )
                 success = True
-                break
+                return True
 
             elif result == Result.ABORT:
                 logger.info(
@@ -85,14 +85,11 @@ def process_payment(payment, *, processors=None, cancel_on_failure=True):
 
     except Exception:
         logger.exception("Exception while processing %(payment)s by %(email)s")
-        success = False
         raise
 
     finally:
         if not success and cancel_on_failure:
             payment.cancel_pending()
-
-    return success
 
 
 def process_unbound_items(*, processors=None):
