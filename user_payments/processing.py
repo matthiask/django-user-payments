@@ -1,5 +1,5 @@
 import logging
-from enum import Enum, auto
+from enum import Enum
 
 from django.apps import apps
 from django.conf import settings
@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 
 class Result(Enum):
     #: Processor has successfully handled the payment
-    SUCCESS = auto()
+    SUCCESS = 1
     #: Preconditions of the processor are not met (e.g. no credit card
     #: information). Try next processor.
-    SKIP = auto()
+    SKIP = 2
     #: Abort processing for this payment, do not run other processors
-    ABORT = auto()
+    ABORT = 3
 
 
 def send_notification_mail(payment):
