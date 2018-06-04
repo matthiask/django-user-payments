@@ -6,7 +6,8 @@ Change log
 `Next version`_
 ~~~~~~~~~~~~~~~
 
-`0.1`_ (2018-03-27)
+
+`0.1`_ (2018-06-05)
 ~~~~~~~~~~~~~~~~~~~
 
 - First release that should be fit for public consumption.
