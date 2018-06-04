@@ -1,7 +1,8 @@
 import logging
 
 from django.apps import apps
-from django.core.mail import send_mail
+from django.conf import settings
+from django.core.mail import EmailMessage
 from django.utils import timezone
 
 from mooch.signals import post_charge
@@ -36,7 +37,12 @@ def attempt_using_stripe_customers(payment):
 
     except stripe.CardError as exc:
         logger.exception("Failure charging the customers' card")
-        send_mail(str(payment), str(exc), None, [payment.email], fail_silently=True)
+        EmailMessage(
+            str(payment),
+            str(exc),
+            to=[payment.email],
+            bcc=[row[1] for row in settings.MANAGERS],
+        ).send(fail_silently=True)
         return False
 
     else:

@@ -1,7 +1,8 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 
 from user_payments.models import LineItem, Payment
 
@@ -26,7 +27,12 @@ default_processors = Processors()
 
 def send_notification_mail(payment):
     # Each time? Each time!
-    send_mail(str(payment), "<No body>", None, [payment.email], fail_silently=True)
+    EmailMessage(
+        str(payment),
+        "<No body>",
+        to=[payment.email],
+        bcc=[row[1] for row in settings.MANAGERS],
+    ).send(fail_silently=True)
 
 
 default_processors.add(send_notification_mail, priority=-1)
