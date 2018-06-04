@@ -239,6 +239,18 @@ class Subscription(models.Model):
 
     delete_pending_periods.alters_data = True
 
+    def cancel(self):
+        # Minus one because create_periods is "up to and including"
+        ends_on = date.today() - timedelta(days=1)
+        if not self.ends_on or self.ends_on > ends_on:
+            self.ends_on = ends_on
+        self.renew_automatically = False
+        self.save()
+
+        self.delete_pending_periods()
+
+    cancel.alters_data = True
+
 
 def payment_changed(sender, instance, **kwargs):
     affected = SubscriptionPeriod.objects.filter(line_item__payment=instance.pk).values(
