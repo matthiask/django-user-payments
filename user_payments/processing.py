@@ -21,6 +21,9 @@ class Result(Enum):
     #: Abort processing for this payment, do not run other processors
     ABORT = 3
 
+    def __bool__(self):
+        raise ResultError("Results may not be interpreted as bools")
+
 
 class ResultError(Exception):
     pass

@@ -10,6 +10,7 @@ from django.utils.translation import deactivate_all
 import stripe
 from user_payments.models import LineItem, Payment
 from user_payments.processing import (
+    Result,
     ResultError,
     process_payment,
     process_unbound_items,
@@ -146,3 +147,7 @@ class Test(TestCase):
 
         with self.assertRaises(ResultError):
             process_payment(Payment(), processors=[fail])
+
+    def test_result_bool(self):
+        with self.assertRaises(ResultError):
+            bool(Result.SUCCESS)
