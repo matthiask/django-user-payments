@@ -13,11 +13,6 @@ class StripeCustomersConfig(AppConfig):
 
     def ready(self):
         from django.conf import settings
-        from .processing import attempt_using_stripe_customers
-        from user_payments.processing import default_processors
 
         stripe.api_key = settings.STRIPE_SECRET_KEY
         self.settings = SimpleNamespace(publishable_key=settings.STRIPE_PUBLISHABLE_KEY)
-
-        # Should be one of the first
-        default_processors.add(attempt_using_stripe_customers, priority=100)

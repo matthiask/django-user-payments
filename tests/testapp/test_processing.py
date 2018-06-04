@@ -90,8 +90,9 @@ class Test(TestCase):
         self.assertTrue(item.payment is None)
         self.assertEqual(Payment.objects.count(), 0)
 
-        # Card error mail, please pay mail
-        self.assertEqual(len(mail.outbox), 2)
+        # Card error mail and nothing else (no please pay mail, processing
+        # should have stopped after the card failure)
+        self.assertEqual(len(mail.outbox), 1)
 
     def test_pending_payments(self):
         item = LineItem.objects.create(

@@ -67,6 +67,13 @@ MIDDLEWARE = [
 STRIPE_SECRET_KEY = "none"
 STRIPE_PUBLISHABLE_KEY = "none"
 
+USER_PAYMENTS = {
+    "processors": [
+        "user_payments.stripe_customers.processing.attempt_using_stripe_customers",
+        "user_payments.processing.send_notification_mail",
+    ]
+}
+
 if os.environ.get("LOG"):
     logger = logging.getLogger("user_payments")
     logger.addHandler(logging.StreamHandler())

@@ -9,6 +9,7 @@ from mooch.signals import post_charge
 
 import stripe
 
+from user_payments.processing import Result
 from user_payments.stripe_customers.models import Customer
 
 
@@ -21,7 +22,7 @@ def attempt_using_stripe_customers(payment):
     try:
         customer = payment.user.stripe_customer
     except Customer.DoesNotExist:
-        return False
+        return Result.SKIP
 
     if (timezone.now() - customer.updated_at).total_seconds() > 30 * 86400:
         customer.refresh()
@@ -43,7 +44,7 @@ def attempt_using_stripe_customers(payment):
             to=[payment.email],
             bcc=[row[1] for row in settings.MANAGERS],
         ).send(fail_silently=True)
-        return False
+        return Result.ABORT
 
     else:
         payment.payment_service_provider = "stripe"
@@ -55,5 +56,4 @@ def attempt_using_stripe_customers(payment):
         post_charge.send(
             sender=attempt_using_stripe_customers, payment=payment, request=None
         )
-
-        return True
+        return Result.SUCCESS

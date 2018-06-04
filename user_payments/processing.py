@@ -1,8 +1,12 @@
 import logging
+from enum import Enum, auto
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
+from django.utils.lru_cache import lru_cache
+from django.utils.module_loading import import_string
 
 from user_payments.models import LineItem, Payment
 
@@ -10,19 +14,14 @@ from user_payments.models import LineItem, Payment
 logger = logging.getLogger(__name__)
 
 
-class Processors:
-    def __init__(self):
-        self._processors = []
-
-    def add(self, processor, *, priority=0):
-        self._processors.append((-priority, processor))
-        self._processors.sort()
-
-    def __iter__(self):
-        return (item[1] for item in self._processors)
-
-
-default_processors = Processors()
+class Result(Enum):
+    #: Processor has successfully handled the payment
+    SUCCESS = auto()
+    #: Preconditions of the processor are not met (e.g. no credit card
+    #: information). Try next processor.
+    SKIP = auto()
+    #: Abort processing for this payment, do not run other processors
+    ABORT = auto()
 
 
 def send_notification_mail(payment):
@@ -33,12 +32,17 @@ def send_notification_mail(payment):
         to=[payment.email],
         bcc=[row[1] for row in settings.MANAGERS],
     ).send(fail_silently=True)
+    # No success, but do not abort processing.
+    return Result.SKIP
 
 
-default_processors.add(send_notification_mail, priority=-1)
+@lru_cache(maxsize=None)
+def get_processors(processors=None):
+    processors = processors or apps.get_app_config("user_payments").settings.processors
+    return [import_string(processor) for processor in processors]
 
 
-def process_payment(payment, *, processors=default_processors, cancel_on_failure=True):
+def process_payment(payment, *, processors=None, cancel_on_failure=True):
     logger.info(
         "Processing: %(payment)s by %(email)s",
         {"payment": payment, "email": payment.email},
@@ -46,10 +50,10 @@ def process_payment(payment, *, processors=default_processors, cancel_on_failure
     success = False
 
     try:
-        for processor in processors:
+        for processor in get_processors(processors):
             # Success processing the payment?
-            success = processor(payment)
-            if success:
+            result = processor(payment)
+            if result == Result.SUCCESS:
                 logger.info(
                     "Success: %(payment)s by %(email)s with %(processor)s",
                     {
@@ -58,7 +62,21 @@ def process_payment(payment, *, processors=default_processors, cancel_on_failure
                         "processor": processor.__name__,
                     },
                 )
-                return True
+                success = True
+                break
+
+            elif result == Result.ABORT:
+                logger.info(
+                    "Warning: Processor %(processor)s aborts processing of"
+                    " %(payment)s by %(email)s",
+                    {
+                        "payment": payment,
+                        "email": payment.email,
+                        "processor": processor.__name__,
+                    },
+                )
+                break
+
         else:
             logger.warning(
                 "Warning: No success processing %(payment)s by %(email)s",
@@ -75,7 +93,7 @@ def process_payment(payment, *, processors=default_processors, cancel_on_failure
             payment.cancel_pending()
 
 
-def process_unbound_items(*, processors=default_processors):
+def process_unbound_items(*, processors=None):
     for user in (
         get_user_model()
         .objects.filter(id__in=LineItem.objects.unbound().values("user"))
@@ -86,6 +104,6 @@ def process_unbound_items(*, processors=default_processors):
             process_payment(payment, processors=processors)
 
 
-def process_pending_payments(*, processors=default_processors):
+def process_pending_payments(*, processors=None):
     for payment in Payment.objects.pending():
         process_payment(payment, processors=processors, cancel_on_failure=False)
