@@ -75,9 +75,34 @@ and the payment is paid for, the subscription automatically runs its
 ``paid_until`` date field to the date when the latest subscription
 period ends.
 
+However, the subscription status is not only determined by
+``paid_until``. By default, subscriptions have a grace period of 7 days
+during which the subscription is still ``subscription.is_active``, but
+also ``subscription.in_grace_period``. The date time when the grace
+period ends is available as ``subscription.grace_period_ends_at``.
+
+Take note that the grace period also applies to subscriptions that have
+been newly created, that is, never been paid for.
+
+Subscriptions should be canceled by calling ``subscription.cancel()``.
+This method disabled automatic renewal and removes periods and their
+line items in case they haven't been paid for yet.
+
 
 Periodical tasks and maintenance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The management command ``process_subscriptions`` runs the following
+methods:
+
+- ``Subscription.objects.disable_autorenewal()``: Cancel subscriptions
+  that are past due by ``disable_autorenewal_after`` days, by default 15
+  days.
+- ``Subscription.objects.create_periods()``: Run
+  ``subscription.create_periods()`` on all subscriptions that should
+  renew automatically.
+- ``SubscriptionPeriod.objects.create_line_items()``: Make periods
+  create their line items in case they haven't done so already.
 
 
 Closing notes

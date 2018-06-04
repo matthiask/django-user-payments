@@ -270,8 +270,6 @@ class SubscriptionPeriodManager(models.Manager):
         return self.filter(line_item__payment__charged_at__isnull=False)
 
     def create_line_items(self):
-        # Not really a good QuerySet method, should be a manager method, but
-        # whatever...
         for period in self.filter(line_item__isnull=True):
             period.create_line_item()
 
