@@ -22,6 +22,9 @@ def attempt_using_stripe_customers(payment):
     except Customer.DoesNotExist:
         return False
 
+    if (timezone.now() - customer.updated_at).total_seconds() > 30 * 86400:
+        customer.refresh()
+
     try:
         charge = stripe.Charge.create(
             customer=customer.customer_id,
