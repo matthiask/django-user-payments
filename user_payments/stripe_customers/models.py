@@ -58,6 +58,8 @@ class Customer(models.Model):
     def save(self, *args, **kwargs):
         if not self.customer_data:
             self.refresh(save=False)
+        if hasattr(self, '_customer_data_cache'):
+            self.customer_data = json.dumps(self._customer_data_cache)
         super().save(*args, **kwargs)
 
     save.alters_data = True
@@ -83,7 +85,6 @@ class Customer(models.Model):
     @customer.setter
     def customer(self, value):
         self._customer_data_cache = value
-        self.customer_data = json.dumps(self._customer_data_cache)
 
     def refresh(self, save=True):
         self.customer = stripe.Customer.retrieve(
