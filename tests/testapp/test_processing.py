@@ -9,7 +9,12 @@ from django.utils.translation import deactivate_all
 
 import stripe
 from user_payments.models import LineItem, Payment
-from user_payments.processing import process_unbound_items, process_pending_payments
+from user_payments.processing import (
+    ResultError,
+    process_payment,
+    process_unbound_items,
+    process_pending_payments,
+)
 from user_payments.stripe_customers.models import Customer
 
 
@@ -134,3 +139,10 @@ class Test(TestCase):
                 side_effect=SomeException(),  # Just not a stripe.CardError
             ):
                 process_pending_payments()
+
+    def test_custom_processor(self):
+        def fail(payment):
+            return None  # Invalid return value
+
+        with self.assertRaises(ResultError):
+            process_payment(Payment(), processors=[fail])

@@ -22,6 +22,10 @@ class Result(Enum):
     ABORT = 3
 
 
+class ResultError(Exception):
+    pass
+
+
 def send_notification_mail(payment):
     # Each time? Each time!
     EmailMessage(
@@ -69,6 +73,15 @@ def process_payment(payment, *, processors=None, cancel_on_failure=True):
                     },
                 )
                 break
+
+            elif result == Result.SKIP:
+                # It's fine, do nothing.
+                pass
+
+            else:
+                raise ResultError(
+                    "Invalid result %r from %s" % (result, processor.__name__)
+                )
 
         else:
             logger.warning(
