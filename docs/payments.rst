@@ -19,8 +19,26 @@ add a line item each time the user requests the functionality:
 
         # .. further processing and response generation
 
-At the time the user wants to pay the costs that have run up, you create
-a pending payment and hand the payment off to a set of moochers:
+At the time the user wants to pay the costs that have run up you create
+a pending payment and maybe process it using a moocher.
+
+.. admonition:: A quick introduction to moochers
+
+   Moochers (provided by `django-mooch
+   <https://github.com/matthiask/django-mooch>`_) take a request and a
+   payment instance, show a form or a button, and handle interaction
+   with and responses from payment service providers. They allow
+   processing individual payments one at a time.
+
+   django-user-payments' ``Payment`` model extends the abstract
+   ``mooch.Payment`` so that moochers may be readily used.
+
+
+The first view below, ``pay`` creates the pending payment and redirects
+the user to the next step. ``pay_payment`` fetches the pending payment
+from the database and allows selecting a payment method. Further
+processing is the responsibility of the selected moocher.
+
 
 .. code-block:: python
 
@@ -48,17 +66,6 @@ a pending payment and hand the payment off to a set of moochers:
                 for moocher in moochers.values()
             ],
         })
-
-.. admonition:: A quick introduction to moochers
-
-   Moochers (provided by `django-mooch
-   <https://github.com/matthiask/django-mooch>`_) take a request and a
-   payment instance, show a form or a button, and handle interaction
-   with and responses from payment service providers. They allow
-   processing individual payments one at a time.
-
-   django-user-payments' ``Payment`` model extends the abstract
-   ``mooch.Payment`` so that moochers may be readily used.
 
 
 A payment life cycle

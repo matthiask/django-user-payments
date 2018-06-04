@@ -318,3 +318,20 @@ class SubscriptionPeriod(models.Model):
             self.save()
 
     create_line_item.alters_data = True
+
+    @property
+    def starts_at(self):
+        return timezone.make_aware(
+            datetime.combine(self.starts_on, time.min), timezone.get_default_timezone()
+        )
+
+    @property
+    def ends_at(self):
+        return (
+            timezone.make_aware(
+                datetime.combine(self.ends_on, time.max),
+                timezone.get_default_timezone(),
+            )
+            if self.ends_on
+            else None
+        )

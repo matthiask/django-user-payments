@@ -97,8 +97,9 @@ class Test(TestCase):
             ends_on=date(2016, 1, 31),
         )
 
+        periods = subscription.create_periods()
         self.assertEqual(
-            [p.ends_on for p in subscription.create_periods()],
+            [p.ends_on for p in periods],
             [
                 date(2016, 1, 7),
                 date(2016, 1, 14),
@@ -110,6 +111,13 @@ class Test(TestCase):
 
         self.assertTrue(
             tuple(subscription.ends_at.timetuple())[:6], (2016, 1, 31, 23, 59, 59)
+        )
+
+        self.assertEqual(
+            tuple(periods[0].starts_at.timetuple())[:6], (2016, 1, 1, 0, 0, 0)
+        )
+        self.assertEqual(
+            tuple(periods[0].ends_at.timetuple())[:6], (2016, 1, 7, 23, 59, 59)
         )
 
     def test_autorenewal(self):
