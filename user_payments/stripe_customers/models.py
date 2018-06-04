@@ -3,7 +3,6 @@ import json
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
 import stripe
@@ -56,10 +55,10 @@ class Customer(models.Model):
         return "%s%s" % (self.customer_id[:10], "*" * (len(self.customer_id) - 10))
 
     def save(self, *args, **kwargs):
+        if hasattr(self, "_customer_data_cache"):
+            self.customer_data = json.dumps(self._customer_data_cache)
         if not self.customer_data:
             self.refresh(save=False)
-        if hasattr(self, '_customer_data_cache'):
-            self.customer_data = json.dumps(self._customer_data_cache)
         super().save(*args, **kwargs)
 
     save.alters_data = True
@@ -76,15 +75,14 @@ class Customer(models.Model):
         Does NOT work with ``instance.refresh_from_db()`` -- you have to fetch
         a completely new object from the database.
         """
-        if not self.customer_data:
-            return None
         if not hasattr(self, "_customer_data_cache"):
-            self._customer_data_cache = json.loads(self.customer_data)
+            self._customer_data_cache = json.loads(self.customer_data or "{}")
         return self._customer_data_cache
 
     @customer.setter
     def customer(self, value):
         self._customer_data_cache = value
+        self.customer_data = json.dumps(self._customer_data_cache)
 
     def refresh(self, save=True):
         self.customer = stripe.Customer.retrieve(

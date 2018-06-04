@@ -77,11 +77,10 @@ class Test(TestCase):
         self.assertEqual(customer.customer_data, '{"bla": 3}')
         self.assertEqual(customer.customer, {"bla": 3, "test": 5})
 
-        # No change detection!
+        # Change is serialized when calling .save()
         customer.save()
         customer = Customer.objects.get()
-        self.assertEqual(customer.customer_data, '{"bla": 3}')
-        self.assertEqual(customer.customer, {"bla": 3})
+        self.assertEqual(customer.customer, {"bla": 3, "test": 5})
 
     def test_refresh(self):
         with mock.patch.object(stripe.Customer, "retrieve", return_value={"bla": 3}):
