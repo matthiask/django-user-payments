@@ -323,3 +323,17 @@ class Test(TestCase):
         Payment.objects.get().save()
         subscription.refresh_from_db()
         self.assertEqual(subscription.paid_until, date(2018, 1, 31))
+
+    def test_cancel(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date(2018, 1, 1),
+        )
+        self.assertEqual(len(subscription.create_periods(until=date(2018, 4, 1))), 4)
+        subscription.cancel()
+        self.assertEqual(subscription.periods.count(), 0)
+        self.assertEqual(len(subscription.create_periods(until=date(2018, 4, 1))), 0)

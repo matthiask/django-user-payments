@@ -1,8 +1,10 @@
+from datetime import timedelta
 from unittest import mock
 
 from django.contrib.auth.models import User
 from django.core import mail
 from django.test import TestCase
+from django.utils import timezone
 from django.utils.translation import deactivate_all
 
 import stripe
@@ -43,6 +45,28 @@ class Test(TestCase):
         payment = Payment.objects.get()
         self.assertTrue(payment.charged_at is not None)
         self.assertEqual(payment.user, item.user)
+
+    def test_refresh(self):
+        item = LineItem.objects.create(
+            user=User.objects.create(username="test1", email="test1@example.com"),
+            amount=5,
+            title="Stuff",
+        )
+
+        Customer.objects.create(
+            user=item.user, customer_id="cus_example", customer_data="{}"
+        )
+
+        Customer.objects.update(updated_at=timezone.now() - timedelta(days=60))
+
+        with mock.patch.object(stripe.Charge, "create", return_value={"success": True}):
+            with mock.patch.object(
+                stripe.Customer, "retrieve", return_value={"marker": True}
+            ):
+                process_unbound_items()
+
+        customer = Customer.objects.get()
+        self.assertEqual(customer.customer, {"marker": True})
 
     def test_card_error(self):
         item = LineItem.objects.create(

@@ -240,10 +240,7 @@ class Subscription(models.Model):
     delete_pending_periods.alters_data = True
 
     def cancel(self):
-        # Minus one because create_periods is "up to and including"
-        ends_on = date.today() - timedelta(days=1)
-        if not self.ends_on or self.ends_on > ends_on:
-            self.ends_on = ends_on
+        self.ends_on = self.paid_until
         self.renew_automatically = False
         self.save()
 
