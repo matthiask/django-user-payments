@@ -69,7 +69,7 @@ STRIPE_PUBLISHABLE_KEY = "none"
 
 USER_PAYMENTS = {
     "processors": [
-        "user_payments.stripe_customers.processing.attempt_using_stripe_customers",
+        "user_payments.stripe_customers.processing.with_stripe_customer",
         "user_payments.processing.send_notification_mail",
     ]
 }

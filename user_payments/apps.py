@@ -14,7 +14,7 @@ class UserPayments(AppConfig):
         "grace_period": timedelta(days=7),
         "disable_autorenewal_after": timedelta(days=15),
         "processors": [
-            # "user_payments.stripe_customers.processing.attempt_using_stripe_customers",
+            # "user_payments.stripe_customers.processing.with_stripe_customer",
             "user_payments.processing.send_notification_mail"
         ],
     }

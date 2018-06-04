@@ -16,7 +16,7 @@ from user_payments.stripe_customers.models import Customer
 logger = logging.getLogger(__name__)
 
 
-def attempt_using_stripe_customers(payment):
+def with_stripe_customer(payment):
     s = apps.get_app_config("user_payments").settings
 
     try:
@@ -53,7 +53,5 @@ def attempt_using_stripe_customers(payment):
         payment.save()
 
         # FIXME sender?
-        post_charge.send(
-            sender=attempt_using_stripe_customers, payment=payment, request=None
-        )
+        post_charge.send(sender=with_stripe_customer, payment=payment, request=None)
         return Result.SUCCESS
