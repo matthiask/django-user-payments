@@ -60,10 +60,11 @@ class SubscriptionManager(models.Manager):
         subscriptions. Defaults to 15 days.
         """
         s = apps.get_app_config("user_payments").settings
-        self.filter(
+        for subscription in self.filter(
             renew_automatically=True,
             paid_until__lt=timezone.now() - s.disable_autorenewal_after,
-        ).update(renew_automatically=False)
+        ):
+            subscription.cancel()
 
 
 class Subscription(models.Model):

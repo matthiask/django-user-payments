@@ -142,10 +142,10 @@ class Test(TestCase):
         )
 
         # Restart the subscription
+        Subscription.objects.ensure(
+            user=self.user, code="test4", starts_on=date.today(), ends_on=None
+        )
         subscription.refresh_from_db()
-
-        subscription.starts_on = date.today()
-        subscription.save()
 
         periods = subscription.create_periods()
         self.assertEqual([p.starts_on for p in periods], [date.today()])
