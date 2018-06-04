@@ -92,6 +92,8 @@ def process_payment(payment, *, processors=None, cancel_on_failure=True):
         if not success and cancel_on_failure:
             payment.cancel_pending()
 
+    return success
+
 
 def process_unbound_items(*, processors=None):
     for user in (
