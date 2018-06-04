@@ -2,6 +2,7 @@ from datetime import timedelta
 from types import SimpleNamespace
 
 from django.apps import AppConfig
+from django.utils.module_loading import import_string
 from django.utils.text import capfirst
 from django.utils.translation import gettext_lazy as _
 
@@ -25,3 +26,4 @@ class UserPayments(AppConfig):
         self.settings = SimpleNamespace(
             **{**self.default_settings, **getattr(settings, "USER_PAYMENTS", {})}
         )
+        self.processors = [import_string(proc) for proc in self.settings.processors]

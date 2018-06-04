@@ -5,8 +5,6 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
-from django.utils.lru_cache import lru_cache
-from django.utils.module_loading import import_string
 
 from user_payments.models import LineItem, Payment
 
@@ -36,21 +34,16 @@ def send_notification_mail(payment):
     return Result.SKIP
 
 
-@lru_cache(maxsize=None)
-def get_processors(processors=None):
-    processors = processors or apps.get_app_config("user_payments").settings.processors
-    return [import_string(processor) for processor in processors]
-
-
 def process_payment(payment, *, processors=None, cancel_on_failure=True):
     logger.info(
         "Processing: %(payment)s by %(email)s",
         {"payment": payment, "email": payment.email},
     )
     success = False
+    processors = processors or apps.get_app_config("user_payments").processors
 
     try:
-        for processor in get_processors(processors):
+        for processor in processors:
             # Success processing the payment?
             result = processor(payment)
             if result == Result.SUCCESS:
