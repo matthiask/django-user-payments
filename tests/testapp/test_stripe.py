@@ -46,7 +46,6 @@ class Test(TestCase):
             )
 
         self.assertEqual(str(customer), "cus_BdO5X6********")
-        self.assertEqual(customer.active_subscriptions, {"stadtbuergerin": True})
 
         client = self.login()
 
@@ -91,10 +90,6 @@ class Test(TestCase):
         customer = Customer.objects.get()
         self.assertEqual(customer.customer_data, '{"bla": 3}')
         self.assertEqual(customer.customer, {"bla": 3})
-
-    def test_nocrash(self):
-        customer = Customer()
-        self.assertEqual(customer.active_subscriptions, {})
 
     def test_with_token_create(self):
         with mock.patch.object(stripe.Customer, "create", return_value=self.data):

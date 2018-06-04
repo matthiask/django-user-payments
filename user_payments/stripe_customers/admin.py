@@ -28,13 +28,7 @@ def sanitize(data, *, key=None):
 
 @admin.register(models.Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = (
-        "user",
-        "customer_id_admin",
-        "created_at",
-        "updated_at",
-        "active_subscriptions",
-    )
+    list_display = ("user", "customer_id_admin", "created_at", "updated_at")
     raw_id_fields = ("user",)
     search_fields = ("user__email",)
 
