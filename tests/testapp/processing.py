@@ -2,7 +2,6 @@ import json
 import logging
 
 from django.apps import apps
-from django.conf import settings
 from django.core.mail import EmailMessage
 from django.db.models import ObjectDoesNotExist
 from django.utils import timezone
@@ -22,7 +21,6 @@ def please_pay_mail(payment):
         str(payment),
         "<No body>",
         to=[payment.email],
-        bcc=[row[1] for row in settings.MANAGERS],
     ).send(fail_silently=True)
     # No success, but do not terminate processing.
     return Result.FAILURE
@@ -54,7 +52,6 @@ def with_stripe_customer(payment):
             str(payment),
             str(exc),
             to=[payment.email],
-            bcc=[row[1] for row in settings.MANAGERS],
         ).send(fail_silently=True)
         return Result.TERMINATE
 
