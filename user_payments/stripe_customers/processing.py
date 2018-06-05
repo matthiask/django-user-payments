@@ -22,7 +22,7 @@ def with_stripe_customer(payment):
     try:
         customer = payment.user.stripe_customer
     except Customer.DoesNotExist:
-        return Result.SKIP
+        return Result.FAILURE
 
     if (timezone.now() - customer.updated_at).total_seconds() > 30 * 86400:
         customer.refresh()

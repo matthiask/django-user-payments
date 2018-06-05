@@ -17,7 +17,7 @@ class Result(Enum):
     SUCCESS = 1
     #: Preconditions of the processor are not met (e.g. no credit card
     #: information). Try next processor.
-    SKIP = 2
+    FAILURE = 2
     #: Abort processing for this payment, do not run other processors
     ABORT = 3
 
@@ -38,7 +38,7 @@ def please_pay_mail(payment):
         bcc=[row[1] for row in settings.MANAGERS],
     ).send(fail_silently=True)
     # No success, but do not abort processing.
-    return Result.SKIP
+    return Result.FAILURE
 
 
 def process_payment(payment, *, processors=None, cancel_on_failure=True):
@@ -77,7 +77,7 @@ def process_payment(payment, *, processors=None, cancel_on_failure=True):
                 )
                 break
 
-            elif result == Result.SKIP:
+            elif result == Result.FAILURE:
                 # It's fine, do nothing.
                 pass
 
