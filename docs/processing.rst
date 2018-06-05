@@ -160,7 +160,6 @@ management command follows:
 .. code-block:: python
 
     from django.core.management.base import BaseCommand
-    from django.db import transaction
 
     from user_payments.processing import process_unbound_items, process_pending_payments
 
@@ -174,7 +173,10 @@ management command follows:
     class Command(BaseCommand):
         help = "Create pending payments from line items and try settling them"
 
-        def _handle(self, **options):
-            with transaction.atomic():
-                process_unbound_items(processors=processors)
-                process_pending_payments(processors=processors)
+        def handle(self, **options):
+            # Maybe call those here as well?
+            # Subscription.objects.disable_autorenewal()
+            # Subscription.objects.create_periods()
+            # SubscriptionPeriod.objects.create_line_items()
+            process_unbound_items(processors=processors)
+            process_pending_payments(processors=processors)
