@@ -31,6 +31,12 @@ The following ``Result`` values exist:
 - ``Result.TERMINATE``: Terminate processing for this payment, do not
   run any further processors.
 
+When using ``process_payment()`` as you should (see below) and an
+individual processor raises exceptions the exception is logged, the
+payment is canceled if ``cancel_on_failure`` is ``True`` (the default)
+and the exception is reraised. In other words: Processors should **not**
+raise exceptions.
+
 
 Bundled processors
 ~~~~~~~~~~~~~~~~~~
