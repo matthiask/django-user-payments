@@ -177,7 +177,8 @@ management command follows:
         help = "Create pending payments from line items and try settling them"
 
         def handle(self, **options):
-            # Maybe call those here as well?
+            # Probably makes sense to call these as well if you are
+            # using subscriptions as well:
             # Subscription.objects.disable_autorenewal()
             # Subscription.objects.create_periods()
             # SubscriptionPeriod.objects.create_line_items()

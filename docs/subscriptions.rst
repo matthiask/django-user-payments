@@ -92,8 +92,8 @@ line items in case they haven't been paid for yet.
 Periodical tasks and maintenance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The management command ``process_subscriptions`` runs the following
-methods:
+The following commands would make sense to run periodically in a
+management command:
 
 - ``Subscription.objects.disable_autorenewal()``: Cancel subscriptions
   that are past due by ``disable_autorenewal_after`` days, by default 15
@@ -103,6 +103,9 @@ methods:
   renew automatically.
 - ``SubscriptionPeriod.objects.create_line_items()``: Make periods
   create their line items in case they haven't done so already.
+
+The processing documentation contains a management command where those
+functions are commented out.
 
 
 Closing notes
