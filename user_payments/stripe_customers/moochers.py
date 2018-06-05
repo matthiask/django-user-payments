@@ -80,16 +80,8 @@ class StripeMoocher(BaseMoocher):
                 and request.POST.get("token")
                 and request.user.is_authenticated
             ):
-                kw = {}
-                obj = stripe.Customer.create(
-                    email=request.user.email,
-                    source=request.POST["token"],
-                    expand=["default_source"],
-                    idempotency_key="customer-%s" % request.user.id,
-                    **kw
-                )
-                customer = Customer.objects.create(
-                    user=request.user, customer_id=obj.id, customer=obj
+                customer = Customer.objects.with_token(
+                    user=request.user, token=request.POST["token"]
                 )
 
             if customer:
