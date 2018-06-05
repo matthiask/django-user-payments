@@ -121,6 +121,9 @@ they should please pay soon-ish:
         EmailMessage(str(payment), "<No body>", to=[payment.email]).send(fail_silently=True)
         return Result.FAILURE
 
+Since this processor runs its action before returning a failure state,
+it only makes sense to run this one last.
+
 
 Processing individual payments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
