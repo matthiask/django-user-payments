@@ -36,7 +36,8 @@ Bundled processors
 ~~~~~~~~~~~~~~~~~~
 
 - ``user_payments.processing.please_pay_mail``: Sends the user a mail
-  that payment is due and returns a failure result.
+  that payment is due and returns a failure result. This processor will
+  probably most often be added as the last entry in the processors list.
 - ``user_payments.stripe_customers.processing.with_stripe_customer``:
   Tries charging the users' credit card using Stripe. If a Stripe
   customer exists but their card could not be charged for some reason,
