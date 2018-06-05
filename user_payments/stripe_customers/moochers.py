@@ -1,3 +1,5 @@
+import json
+
 from django import http
 from django.apps import apps
 from django.conf.urls import url
@@ -107,7 +109,7 @@ class StripeMoocher(BaseMoocher):
             # TODO Error handling
 
             instance.charged_at = timezone.now()
-            instance.transaction = str(charge)
+            instance.transaction = json.dumps(charge)
             instance.save()
 
             post_charge.send(sender=self, payment=instance, request=request)
