@@ -20,7 +20,7 @@ The moocher
 
 The ``user_payments.stripe_customers.moochers.StripeMoocher`` is
 basically a drop-in replacement for django-mooch's
-``mooch.stripe.StripeMoocher``, except for:
+``mooch.stripe.StripeMoocher``, except that:
 
 - Instead of only charging the user once, our moocher creates a Stripe
   customer and binds it to a local Django user (in case the user is
