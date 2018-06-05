@@ -43,6 +43,6 @@ change the defaults:
             # You probably want to uncomment this, especially when adding
             # user_payments.stripe_customers above!
             # "user_payments.stripe_customers.processing.with_stripe_customer",
-            "user_payments.processing.send_notification_mail"
+            "user_payments.processing.please_pay_mail"
         ],
     }

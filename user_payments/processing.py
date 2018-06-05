@@ -29,7 +29,7 @@ class ResultError(Exception):
     pass
 
 
-def send_notification_mail(payment):
+def please_pay_mail(payment):
     # Each time? Each time!
     EmailMessage(
         str(payment),

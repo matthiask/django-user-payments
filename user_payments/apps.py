@@ -16,7 +16,7 @@ class UserPayments(AppConfig):
         "disable_autorenewal_after": timedelta(days=15),
         "processors": [
             # "user_payments.stripe_customers.processing.with_stripe_customer",
-            "user_payments.processing.send_notification_mail"
+            "user_payments.processing.please_pay_mail"
         ],
     }
 
