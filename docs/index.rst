@@ -18,6 +18,6 @@ Table of Contents
    installation
    payments
    subscriptions
-   processing
    stripe-customers
+   processing
    changelog

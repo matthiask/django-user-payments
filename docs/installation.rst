@@ -39,10 +39,4 @@ change the defaults:
         "currency": "CHF",
         "grace_period": timedelta(days=7),
         "disable_autorenewal_after": timedelta(days=15),
-        "processors": [
-            # You probably want to uncomment this, especially when adding
-            # user_payments.stripe_customers above!
-            # "user_payments.stripe_customers.processing.with_stripe_customer",
-            "user_payments.processing.please_pay_mail"
-        ],
     }

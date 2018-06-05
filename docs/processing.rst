@@ -38,36 +38,88 @@ and the exception is reraised. In other words: Processors should **not**
 raise exceptions.
 
 
-Bundled processors
-~~~~~~~~~~~~~~~~~~
+Writing your processors
+~~~~~~~~~~~~~~~~~~~~~~~
 
-- ``user_payments.processing.please_pay_mail``: Sends the user a mail
-  that payment is due and returns a failure result. This processor will
-  probably most often be added as the last entry in the processors list.
-- ``user_payments.stripe_customers.processing.with_stripe_customer``:
-  Tries charging the users' credit card using Stripe. If a Stripe
-  customer exists but their card could not be charged for some reason,
-  this processor sends a mail and terminates further processing for this
-  payment, so that e.g. the ``please_pay_mail`` does not send another
-  mail.
+django-user-payments does not bundle any processors, but makes it
+relatively straightforward to write your own.
 
-.. warning::
 
-   Instead of sending a mail we will probably dispatch a signal in the
-   near future.
+The Stripe customers processor
+------------------------------
 
-By default, only the ``please_pay_mail`` is activated. To activate both,
-add ``"user_payments.stripe_customers"`` to ``INSTALLED_APPS`` and add
-at least the following ``USER_PAYMENTS`` setting:
+This processors' prerequisites are a Stripe customer instance. If the
+prerequisites are fulfilled, this processor tries charging the user, and
+if this fails, sends an error mail to the user and terminates further
+processing:
 
 .. code-block:: python
 
-    USER_PAYMENTS = {
-        "processors": [
-            "user_payments.stripe_customers.processing.with_stripe_customer",
-            "user_payments.processing.please_pay_mail"
-        ],
-    }
+    import json
+    import logging
+
+    from django.apps import apps
+    from django.core.mail import EmailMessage
+    from django.db.models import ObjectDoesNotExist
+    from django.utils import timezone
+
+    import stripe
+
+    from user_payments.processing import Result
+
+
+    logger = logging.getLogger(__name__)
+
+
+    def with_stripe_customer(payment):
+        try:
+            customer = payment.user.stripe_customer
+        except ObjectDoesNotExist:
+            return Result.FAILURE
+
+        s = apps.get_app_config("user_payments").settings
+        try:
+            charge = stripe.Charge.create(
+                customer=customer.customer_id,
+                amount=payment.amount_cents,
+                currency=s.currency,
+                description=payment.description,
+                idempotency_key="charge-%s-%s" % (payment.id.hex, payment.amount_cents),
+            )
+
+        except stripe.CardError as exc:
+            logger.exception("Failure charging the customers' card")
+            EmailMessage(str(payment), str(exc), to=[payment.email]).send(
+                fail_silently=True
+            )
+            return Result.TERMINATE
+
+        else:
+            payment.payment_service_provider = "stripe"
+            payment.charged_at = timezone.now()
+            payment.transaction = json.dumps(charge)
+            payment.save()
+
+            return Result.SUCCESS
+
+
+A processor which sends a "Please pay" mail
+-------------------------------------------
+
+This processor always fails, but sends a mail to the user first that
+they should please pay soon-ish:
+
+.. code-block:: python
+
+    from django.core.mail import EmailMessage
+
+    from user_payments.processing import Result
+
+
+    def please_pay_mail(payment):
+        # Each time? Each time!
+        EmailMessage(str(payment), "<No body>", to=[payment.email]).send(fail_silently=True)
+        return Result.FAILURE
 
 
 Processing individual payments
@@ -75,31 +127,54 @@ Processing individual payments
 
 The work horse of processing is the
 ``user_payments.processing.process_payment`` function. The function
-expects a payment instance and returns ``True`` if one of the individual
-processors returned a ``Result.SUCCESS`` state.
+expects a payment instance and a list of processors and returns ``True``
+if one of the individual processors returned a ``Result.SUCCESS`` state.
 
-The list of processors can be overridden by passing a list of callables
-as ``processors=[...]``. If all processors fail the payment is
-automatically canceled and the payments' line items returned to the pool
-of unbound line items. This can be changed by passing
-``cancel_on_failure=False`` in case this behavior is undesirable.
+If all processors fail the payment is automatically canceled and the
+payments' line items returned to the pool of unbound line items. This
+can be changed by passing ``cancel_on_failure=False`` in case this
+behavior is undesirable.
+
+
+Bulk processing
+~~~~~~~~~~~~~~~
+
+The ``user_payments.processing`` module offers the following functions
+to bulk process payments:
+
+- ``process_unbound_items(processors=[...])``: Creates pending payments
+  for all users with unbound line items and calls ``process_payment`` on
+  them. Cancels payments if no processor succeeds.
+- ``process_pending_payments(processors=[...])``: Runs all unpaid
+  payments through ``process_payment``, but does not cancel a payment
+  upon failure.
 
 
 Management command
 ~~~~~~~~~~~~~~~~~~
 
-The management command ``process_payments`` runs the following
-functions from the ``user_payments.processing`` module:
+My recommendation is to write a management command that is run daily and
+which processes unbound line items and unpaid payments. An example
+management command follows:
 
-- ``process_unbound_items``: Creates a pending payment for all users
-  with unbound line items and sends the payment through
-  ``process_payment``. Unsuccessful payments are canceled and removed.
-- ``process_pending_payments``: Runs all payments through
-  ``process_payment``, but does not cancel a payment upon failure.
+.. code-block:: python
+
+    from django.core.management.base import BaseCommand
+    from django.db import transaction
+
+    from user_payments.processing import process_unbound_items, process_pending_payments
+
+    # Import the processors defined above
+    from yourapp.processing import with_stripe_customer, please_pay_mail
 
 
-Logging
-~~~~~~~
+    processors = [with_stripe_customer, please_pay_mail]
 
-django-user-payments' processing framework emits many log messages. You
-probably want to configure a logger for ``"user_payments"``.
+
+    class Command(BaseCommand):
+        help = "Create pending payments from line items and try settling them"
+
+        def _handle(self, **options):
+            with transaction.atomic():
+                process_unbound_items(processors=processors)
+                process_pending_payments(processors=processors)

@@ -15,13 +15,6 @@ from user_payments.processing import Result
 logger = logging.getLogger(__name__)
 
 
-def please_pay_mail(payment):
-    # Each time? Each time!
-    EmailMessage(str(payment), "<No body>", to=[payment.email]).send(fail_silently=True)
-    # No success, but do not terminate processing.
-    return Result.FAILURE
-
-
 def with_stripe_customer(payment):
     try:
         customer = payment.user.stripe_customer
@@ -58,6 +51,13 @@ def with_stripe_customer(payment):
         # FIXME sender?
         post_charge.send(sender=with_stripe_customer, payment=payment, request=None)
         return Result.SUCCESS
+
+
+def please_pay_mail(payment):
+    # Each time? Each time!
+    EmailMessage(str(payment), "<No body>", to=[payment.email]).send(fail_silently=True)
+    # No success, but do not terminate processing.
+    return Result.FAILURE
 
 
 processors = [with_stripe_customer, please_pay_mail]

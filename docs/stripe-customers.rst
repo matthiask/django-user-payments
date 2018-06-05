@@ -15,20 +15,6 @@ The Stripe customers app requires ``STRIPE_PUBLISHABLE_KEY`` and
 ``STRIPE_SECRET_KEY`` settings.
 
 
-The ``with_stripe_customer`` processor
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Tries settling a payment using a Stripe customer, if there is any. Sends
-a mail to the user if a customer exists but their card could not be
-charged for some reason, and terminates further processing of the
-payment.
-
-.. warning::
-
-   Instead of sending a mail we will probably dispatch a signal in the
-   near future.
-
-
 The moocher
 ~~~~~~~~~~~
 
