@@ -17,11 +17,7 @@ logger = logging.getLogger(__name__)
 
 def please_pay_mail(payment):
     # Each time? Each time!
-    EmailMessage(
-        str(payment),
-        "<No body>",
-        to=[payment.email],
-    ).send(fail_silently=True)
+    EmailMessage(str(payment), "<No body>", to=[payment.email]).send(fail_silently=True)
     # No success, but do not terminate processing.
     return Result.FAILURE
 
@@ -48,11 +44,9 @@ def with_stripe_customer(payment):
 
     except stripe.CardError as exc:
         logger.exception("Failure charging the customers' card")
-        EmailMessage(
-            str(payment),
-            str(exc),
-            to=[payment.email],
-        ).send(fail_silently=True)
+        EmailMessage(str(payment), str(exc), to=[payment.email]).send(
+            fail_silently=True
+        )
         return Result.TERMINATE
 
     else:

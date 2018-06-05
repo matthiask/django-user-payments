@@ -11,6 +11,9 @@ payments.
    Stripe supports more than one source (that is, credit card) per
    customer, but our ``user_payments.stripe_customers`` module does not.
 
+The Stripe customers app requires ``STRIPE_PUBLISHABLE_KEY`` and
+``STRIPE_SECRET_KEY`` settings.
+
 
 The ``with_stripe_customer`` processor
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -6,11 +6,6 @@ from user_payments.models import Payment
 from user_payments.stripe_customers.moochers import StripeMoocher
 
 
-kw = {"model": Payment, "app_name": "mooch"}
-
-moochers = OrderedDict(
-    [("stripe", StripeMoocher(publishable_key="pk", secret_key="sk", **kw))]
-)
-
 app_name = "mooch"
+moochers = OrderedDict([("stripe", StripeMoocher(model=Payment, app_name=app_name))])
 urlpatterns = [url(r"", include(moocher.urls)) for moocher in moochers.values()]

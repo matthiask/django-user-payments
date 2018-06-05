@@ -4,7 +4,6 @@ from django import http
 from django.apps import apps
 from django.conf.urls import url
 from django.contrib import messages
-from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -21,18 +20,6 @@ from .models import Customer
 class StripeMoocher(BaseMoocher):
     identifier = "stripe"
     title = _("Pay with Stripe")
-    use_idempotency_key = True
-
-    def __init__(self, *, publishable_key, secret_key, **kwargs):
-        if any(x is None for x in (publishable_key, secret_key)):
-            raise ImproperlyConfigured(
-                "%s: None is not allowed in (%r, %r)"
-                % (self.__class__.__name__, publishable_key, secret_key)
-            )
-
-        self.publishable_key = publishable_key
-        self.secret_key = secret_key
-        super().__init__(**kwargs)
 
     def get_urls(self):
         return [url(r"^stripe_charge/$", self.charge_view, name="stripe_charge")]
@@ -43,15 +30,14 @@ class StripeMoocher(BaseMoocher):
         except (AttributeError, Customer.DoesNotExist):
             customer = None
 
-        # XXX Check whether there is a valid subscription (maybe only select
-        # subscriptions with monthly payment?) and add invoice items then?
+        s = apps.get_app_config("stripe_customers").settings
 
         return render_to_string(
             "stripe_customers/payment_form.html",
             {
                 "moocher": self,
                 "payment": payment,
-                "publishable_key": self.publishable_key,
+                "publishable_key": s.publishable_key,
                 "customer": customer,
                 "charge_url": reverse("%s:stripe_charge" % self.app_name),
                 "LANGUAGE_CODE": getattr(request, "LANGUAGE_CODE", "auto"),

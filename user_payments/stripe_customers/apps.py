@@ -15,4 +15,7 @@ class StripeCustomersConfig(AppConfig):
         from django.conf import settings
 
         stripe.api_key = settings.STRIPE_SECRET_KEY
-        self.settings = SimpleNamespace(publishable_key=settings.STRIPE_PUBLISHABLE_KEY)
+        self.settings = SimpleNamespace(
+            publishable_key=settings.STRIPE_PUBLISHABLE_KEY,
+            secret_key=settings.STRIPE_SECRET_KEY,
+        )
