@@ -217,10 +217,6 @@ class Subscription(models.Model):
                     periods.append(p)
                 this_start = next_start
 
-                # TODO This might be a good place to already generate periods
-                # for the near future to inform users that a payment will soon
-                # be due.
-
                 if this_start > end:
                     break
 
@@ -305,8 +301,6 @@ class SubscriptionPeriod(models.Model):
         """
         Create a user payments line item for this subscription period.
         """
-        # TODO Maybe create periods and line items early,
-        # e.g. 7 days before new period begins?
         if not self.line_item:
             self.line_item = LineItem.objects.create(
                 user=self.subscription.user,
