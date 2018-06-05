@@ -101,7 +101,7 @@ def process_payment(payment, *, processors=None, cancel_on_failure=True):
             payment.cancel_pending()
 
 
-def process_unbound_items(*, processors=None):
+def process_unbound_items():
     for user in (
         get_user_model()
         .objects.filter(id__in=LineItem.objects.unbound().values("user"))
@@ -109,9 +109,9 @@ def process_unbound_items(*, processors=None):
     ):
         payment = Payment.objects.create_pending(user=user)
         if payment:  # pragma: no branch (very unlikely)
-            process_payment(payment, processors=processors)
+            process_payment(payment)
 
 
-def process_pending_payments(*, processors=None):
+def process_pending_payments():
     for payment in Payment.objects.pending():
-        process_payment(payment, processors=processors, cancel_on_failure=False)
+        process_payment(payment, cancel_on_failure=False)
