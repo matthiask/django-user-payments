@@ -1,31 +1,43 @@
+import json
 import logging
 
 from django.apps import apps
 from django.conf import settings
 from django.core.mail import EmailMessage
+from django.db.models import ObjectDoesNotExist
 from django.utils import timezone
 
+import stripe
 from mooch.signals import post_charge
 
-import stripe
-
 from user_payments.processing import Result
-from user_payments.stripe_customers.models import Customer
 
 
 logger = logging.getLogger(__name__)
 
 
-def with_stripe_customer(payment):
-    s = apps.get_app_config("user_payments").settings
+def please_pay_mail(payment):
+    # Each time? Each time!
+    EmailMessage(
+        str(payment),
+        "<No body>",
+        to=[payment.email],
+        bcc=[row[1] for row in settings.MANAGERS],
+    ).send(fail_silently=True)
+    # No success, but do not terminate processing.
+    return Result.FAILURE
 
+
+def with_stripe_customer(payment):
     try:
         customer = payment.user.stripe_customer
-    except Customer.DoesNotExist:
+    except ObjectDoesNotExist:
         return Result.FAILURE
 
     if (timezone.now() - customer.updated_at).total_seconds() > 30 * 86400:
         customer.refresh()
+
+    s = apps.get_app_config("user_payments").settings
 
     try:
         charge = stripe.Charge.create(
@@ -49,9 +61,12 @@ def with_stripe_customer(payment):
     else:
         payment.payment_service_provider = "stripe"
         payment.charged_at = timezone.now()
-        payment.transaction = str(charge)
+        payment.transaction = json.dumps(charge)
         payment.save()
 
         # FIXME sender?
         post_charge.send(sender=with_stripe_customer, payment=payment, request=None)
         return Result.SUCCESS
+
+
+processors = [with_stripe_customer, please_pay_mail]

@@ -18,6 +18,8 @@ from user_payments.processing import (
 )
 from user_payments.stripe_customers.models import Customer
 
+from testapp.processing import processors
+
 
 class Test(TestCase):
     def setUp(self):
@@ -41,7 +43,7 @@ class Test(TestCase):
         )
 
         with mock.patch.object(stripe.Charge, "create", return_value={"success": True}):
-            process_unbound_items()
+            process_unbound_items(processors=processors)
 
         self.assertEqual(len(mail.outbox), 1)
 
@@ -69,7 +71,7 @@ class Test(TestCase):
             with mock.patch.object(
                 stripe.Customer, "retrieve", return_value={"marker": True}
             ):
-                process_unbound_items()
+                process_unbound_items(processors=processors)
 
         customer = Customer.objects.get()
         self.assertEqual(customer.customer, {"marker": True})
@@ -89,7 +91,7 @@ class Test(TestCase):
             "create",
             side_effect=stripe.CardError("problem", "param", "code"),
         ):
-            process_unbound_items()
+            process_unbound_items(processors=processors)
 
         item = LineItem.objects.get()
 
@@ -109,7 +111,7 @@ class Test(TestCase):
 
         Payment.objects.create_pending(user=item.user)
 
-        process_pending_payments()
+        process_pending_payments(processors=processors)
 
         self.assertEqual(len(mail.outbox), 1)
 
@@ -139,7 +141,7 @@ class Test(TestCase):
                 "create",
                 side_effect=SomeException(),  # Just not a stripe.CardError
             ):
-                process_pending_payments()
+                process_pending_payments(processors=processors)
 
     def test_custom_processor(self):
         def fail(payment):

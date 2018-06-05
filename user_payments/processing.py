@@ -1,10 +1,7 @@
 import logging
 from enum import Enum
 
-from django.apps import apps
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import EmailMessage
 
 from user_payments.models import LineItem, Payment
 
@@ -29,25 +26,12 @@ class ResultError(Exception):
     pass
 
 
-def please_pay_mail(payment):
-    # Each time? Each time!
-    EmailMessage(
-        str(payment),
-        "<No body>",
-        to=[payment.email],
-        bcc=[row[1] for row in settings.MANAGERS],
-    ).send(fail_silently=True)
-    # No success, but do not terminate processing.
-    return Result.FAILURE
-
-
-def process_payment(payment, *, processors=None, cancel_on_failure=True):
+def process_payment(payment, *, processors, cancel_on_failure=True):
     logger.info(
         "Processing: %(payment)s by %(email)s",
         {"payment": payment, "email": payment.email},
     )
     success = False
-    processors = processors or apps.get_app_config("user_payments").processors
 
     try:
         for processor in processors:
@@ -101,7 +85,7 @@ def process_payment(payment, *, processors=None, cancel_on_failure=True):
             payment.cancel_pending()
 
 
-def process_unbound_items():
+def process_unbound_items(*, processors):
     for user in (
         get_user_model()
         .objects.filter(id__in=LineItem.objects.unbound().values("user"))
@@ -109,9 +93,9 @@ def process_unbound_items():
     ):
         payment = Payment.objects.create_pending(user=user)
         if payment:  # pragma: no branch (very unlikely)
-            process_payment(payment)
+            process_payment(payment, processors=processors)
 
 
-def process_pending_payments():
+def process_pending_payments(*, processors):
     for payment in Payment.objects.pending():
-        process_payment(payment, cancel_on_failure=False)
+        process_payment(payment, cancel_on_failure=False, processors=processors)
