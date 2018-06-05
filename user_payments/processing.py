@@ -18,8 +18,8 @@ class Result(Enum):
     #: Preconditions of the processor are not met (e.g. no credit card
     #: information). Try next processor.
     FAILURE = 2
-    #: Abort processing for this payment, do not run other processors
-    ABORT = 3
+    #: Terminates processing for this payment, do not run other processors
+    TERMINATE = 3
 
     def __bool__(self):
         raise ResultError("Results may not be interpreted as bools")
@@ -37,7 +37,7 @@ def please_pay_mail(payment):
         to=[payment.email],
         bcc=[row[1] for row in settings.MANAGERS],
     ).send(fail_silently=True)
-    # No success, but do not abort processing.
+    # No success, but do not terminate processing.
     return Result.FAILURE
 
 
@@ -65,9 +65,9 @@ def process_payment(payment, *, processors=None, cancel_on_failure=True):
                 success = True
                 return True
 
-            elif result == Result.ABORT:
+            elif result == Result.TERMINATE:
                 logger.info(
-                    "Warning: Processor %(processor)s aborts processing of"
+                    "Warning: Processor %(processor)s terminates processing of"
                     " %(payment)s by %(email)s",
                     {
                         "payment": payment,

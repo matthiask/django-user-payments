@@ -17,7 +17,8 @@ The ``with_stripe_customer`` processor
 
 Tries settling a payment using a Stripe customer, if there is any. Sends
 a mail to the user if a customer exists but their card could not be
-charged for some reason, and aborts further processing of the payment.
+charged for some reason, and terminates further processing of the
+payment.
 
 .. warning::
 

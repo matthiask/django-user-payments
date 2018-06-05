@@ -44,7 +44,7 @@ def with_stripe_customer(payment):
             to=[payment.email],
             bcc=[row[1] for row in settings.MANAGERS],
         ).send(fail_silently=True)
-        return Result.ABORT
+        return Result.TERMINATE
 
     else:
         payment.payment_service_provider = "stripe"
