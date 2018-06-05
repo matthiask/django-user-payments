@@ -1,12 +1,11 @@
-from django.core.management.base import BaseCommand
-
+from user_payments.management.base import OptionalRavenCommand
 from user_payments.user_subscriptions.models import Subscription, SubscriptionPeriod
 
 
-class Command(BaseCommand):
+class Command(OptionalRavenCommand):
     help = "Generate subscription periods and user payments line items"
 
-    def handle(self, **options):
+    def _handle(self, **options):
         Subscription.objects.disable_autorenewal()
         Subscription.objects.create_periods()
         SubscriptionPeriod.objects.create_line_items()

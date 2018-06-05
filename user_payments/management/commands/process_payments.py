@@ -1,15 +1,15 @@
 import logging
 
-from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from user_payments.management.base import OptionalRavenCommand
 from user_payments.processing import process_unbound_items, process_pending_payments
 
 
-class Command(BaseCommand):
+class Command(OptionalRavenCommand):
     help = "Create pending payments from line items and try settling them"
 
-    def handle(self, **options):
+    def _handle(self, **options):
         logger = logging.getLogger("user_payments")
         logger.setLevel(logging.DEBUG)
         handler = logging.StreamHandler()
