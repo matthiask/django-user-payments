@@ -211,10 +211,11 @@ class Subscription(models.Model):
             while True:
                 next_start = next(days)
                 if this_start not in existing:
-                    p, _created = self.periods.get_or_create(
-                        starts_on=this_start, ends_on=next_start - timedelta(days=1)
+                    periods.append(
+                        self.periods.create(
+                            starts_on=this_start, ends_on=next_start - timedelta(days=1)
+                        )
                     )
-                    periods.append(p)
                 this_start = next_start
 
                 if this_start > end:
