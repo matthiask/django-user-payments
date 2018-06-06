@@ -190,3 +190,22 @@ management command follows:
             # Process payments
             process_unbound_items(processors=processors)
             process_pending_payments(processors=processors)
+
+If you're using `Sentry <https://sentry.io/welcome/>`_ you probably want
+to wrap all commands in a ``try..except`` block:
+
+.. code-block:: python
+
+    ...
+
+    from raven.contrib.django.raven_compat.models import client
+
+    class Command(BaseCommand):
+        ...
+
+        def handle(self, **options):
+            try:
+                ...
+            except Exception:
+                client.captureException()
+                raise  # Reraise, for good measure
