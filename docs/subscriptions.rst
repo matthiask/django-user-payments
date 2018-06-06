@@ -112,7 +112,7 @@ management command:
   keyword argument.
 
 The processing documentation contains a management command where those
-functions are commented out.
+functions are called in the recommended way and order.
 
 
 Closing notes

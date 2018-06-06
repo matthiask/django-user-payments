@@ -168,6 +168,8 @@ management command follows:
     from django.core.management.base import BaseCommand
 
     from user_payments.processing import process_unbound_items, process_pending_payments
+    # Remove this line if you're not using subscriptions:
+    from user_payments.user_subscriptions.models import Subscription, SubscriptionPeriod
 
     # Import the processors defined above
     from yourapp.processing import with_stripe_customer, please_pay_mail
@@ -180,10 +182,11 @@ management command follows:
         help = "Create pending payments from line items and try settling them"
 
         def handle(self, **options):
-            # Probably makes sense to call these as well if you are
-            # using subscriptions as well:
-            # Subscription.objects.disable_autorenewal()
-            # Subscription.objects.create_periods()
-            # SubscriptionPeriod.objects.create_line_items()
+            # Remove those three lines if you're not using subscriptions:
+            Subscription.objects.disable_autorenewal()
+            Subscription.objects.create_periods()
+            SubscriptionPeriod.objects.create_line_items()
+
+            # Process payments
             process_unbound_items(processors=processors)
             process_pending_payments(processors=processors)
