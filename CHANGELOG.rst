@@ -9,6 +9,7 @@ Change log
 - Changed ``SubscriptionPeriod.objects.create_line_items()`` to only
   create line items for periods that start no later than today by
   default. A new ``until`` keyword argument allows overriding this.
+- Fixed ``MANIFEST.in`` to include package data of ``stripe_customers``.
 
 
 `0.1`_ (2018-06-05)
