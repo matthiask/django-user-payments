@@ -65,6 +65,10 @@ subscriptions do not only offer date fields -- all date fields have a
 corresponding property returning a date time in the default timezone.
 Periods always start at 00:00:00 and end at 23:59:59.999999.
 
+``subscription.create_periods()`` only creates periods that start no
+later than today. This can be overridden by passing a date using the
+``until`` keyword argument.
+
 
 Subscription status and grace periods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,7 +106,10 @@ management command:
   ``subscription.create_periods()`` on all subscriptions that should
   renew automatically.
 - ``SubscriptionPeriod.objects.create_line_items()``: Make periods
-  create their line items in case they haven't done so already.
+  create their line items in case they haven't done so already. By
+  default only periods that start no later than today are considered.
+  This can be changed by providing another date using the ``until``
+  keyword argument.
 
 The processing documentation contains a management command where those
 functions are commented out.
