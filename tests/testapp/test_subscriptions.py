@@ -41,6 +41,9 @@ class Test(TestCase):
         self.assertEqual(LineItem.objects.count(), 0)
 
         SubscriptionPeriod.objects.create_line_items()
+        self.assertEqual(LineItem.objects.count(), 0)
+
+        SubscriptionPeriod.objects.create_line_items(until=date(2040, 3, 31))
         self.assertEqual(LineItem.objects.count(), 3)
 
         payment = Payment.objects.create_pending(user=self.user)

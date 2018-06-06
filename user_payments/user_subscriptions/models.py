@@ -266,8 +266,10 @@ class SubscriptionPeriodManager(models.Manager):
         """
         return self.filter(line_item__payment__charged_at__isnull=False)
 
-    def create_line_items(self):
-        for period in self.filter(line_item__isnull=True):
+    def create_line_items(self, *, until=None):
+        for period in self.filter(
+            line_item__isnull=True, starts_on__lte=until or date.today()
+        ):
             period.create_line_item()
 
 
