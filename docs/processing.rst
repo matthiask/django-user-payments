@@ -150,7 +150,10 @@ to bulk process payments:
   them. Cancels payments if no processor succeeds.
 - ``process_pending_payments(processors=[...])``: Runs all unpaid
   payments through ``process_payment``, but does not cancel a payment
-  upon failure.
+  upon failure. When you're only using processors and no moochers this
+  function *should* have nothing to do since ``process_unbound_items``
+  always cleans up on failure. Still, it's better to be safe than sorry
+  and run this function too.
 
 
 Management command
