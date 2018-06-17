@@ -152,4 +152,8 @@ class Test(TestCase):
 
     def test_result_bool(self):
         with self.assertRaises(ResultError):
-            bool(Result.SUCCESS)
+            bool(Result.FAILURE)
+
+        with self.assertRaises(ResultError):
+            if Result.SUCCESS:
+                pass
