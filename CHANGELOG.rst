@@ -11,6 +11,8 @@ Change log
   default. A new ``until`` keyword argument allows overriding this.
 - Fixed ``MANIFEST.in`` to include package data of ``stripe_customers``.
 - Changed the code for the updated Stripe Python library.
+- Fixed a crash when creating a subscription with a periodicity of
+  "manually" through the admin interface.
 
 
 `0.1`_ (2018-06-05)

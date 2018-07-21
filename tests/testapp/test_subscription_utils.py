@@ -3,6 +3,7 @@ from itertools import islice
 
 from django.test import TestCase
 
+from user_payments.exceptions import UnknownPeriodicity
 from user_payments.user_subscriptions.utils import next_valid_day, recurring
 
 
@@ -54,5 +55,5 @@ class Test(TestCase):
             ],
         )
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(UnknownPeriodicity):
             list(islice(recurring(date(2016, 1, 1), "unknown"), 5))

@@ -1,6 +1,8 @@
 import itertools
 from datetime import date, timedelta
 
+from user_payments.exceptions import UnknownPeriodicity
+
 
 def next_valid_day(year, month, day):
     """
@@ -51,7 +53,7 @@ def recurring(start, periodicity):
         )
 
     else:
-        raise ValueError("Unknown periodicity %r" % periodicity)
+        raise UnknownPeriodicity("Unknown periodicity %r" % periodicity)
 
 
 if __name__ == "__main__":  # pragma: no cover

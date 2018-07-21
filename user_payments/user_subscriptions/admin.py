@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from user_payments.exceptions import UnknownPeriodicity
 from . import models
 
 
@@ -24,7 +25,10 @@ class SubscriptionAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         if not change:
-            obj.create_periods()
+            try:
+                obj.create_periods()
+            except UnknownPeriodicity as exc:
+                self.message_user(request, exc)
 
 
 @admin.register(models.SubscriptionPeriod)

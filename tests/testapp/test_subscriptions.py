@@ -348,3 +348,28 @@ class Test(TestCase):
         subscription.cancel()
         self.assertEqual(subscription.periods.count(), 0)
         self.assertEqual(len(subscription.create_periods(until=date(2018, 4, 1))), 0)
+
+    def test_admin_create_manual_periodicity(self):
+        client = self.login()
+        response = client.post(
+            "/admin/user_subscriptions/subscription/add/",
+            {
+                "user": self.user.pk,
+                "code": "yay",
+                "title": "yay",
+                "starts_on": date.today().strftime("%Y-%m-%d"),
+                "periodicity": "manually",
+                "amount": 10,
+                "created_at_0": date.today().strftime("%Y-%m-%d"),
+                "created_at_1": "12:00",
+            },
+            follow=True,
+        )
+        # self.assertRedirects(response, "/admin/user_subscriptions/subscription/")
+
+        messages = [str(m) for m in response.context["messages"]]
+        self.assertEqual(messages[0], "Unknown periodicity 'manually'")
+        self.assertEqual(len(messages), 2)
+
+        self.assertEqual(Subscription.objects.count(), 1)
+        self.assertEqual(SubscriptionPeriod.objects.count(), 0)
