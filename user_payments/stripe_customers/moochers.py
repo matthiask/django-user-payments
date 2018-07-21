@@ -102,7 +102,7 @@ class StripeMoocher(BaseMoocher):
 
             return http.HttpResponseRedirect(self.success_url)
 
-        except stripe.CardError as exc:
+        except stripe.error.CardError as exc:
             messages.error(
                 request, _("Card error: %s") % (exc._message or _("No details"))
             )

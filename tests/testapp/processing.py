@@ -35,7 +35,7 @@ def with_stripe_customer(payment):
             idempotency_key="charge-%s-%s" % (payment.id.hex, payment.amount_cents),
         )
 
-    except stripe.CardError as exc:
+    except stripe.error.CardError as exc:
         logger.exception("Failure charging the customers' card")
         EmailMessage(str(payment), str(exc), to=[payment.email]).send(
             fail_silently=True

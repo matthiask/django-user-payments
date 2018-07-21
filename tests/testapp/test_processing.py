@@ -89,7 +89,7 @@ class Test(TestCase):
         with mock.patch.object(
             stripe.Charge,
             "create",
-            side_effect=stripe.CardError("problem", "param", "code"),
+            side_effect=stripe.error.CardError("problem", "param", "code"),
         ):
             process_unbound_items(processors=processors)
 
@@ -139,7 +139,7 @@ class Test(TestCase):
             with mock.patch.object(
                 stripe.Charge,
                 "create",
-                side_effect=SomeException(),  # Just not a stripe.CardError
+                side_effect=SomeException(),  # Just not a stripe.error.CardError
             ):
                 process_pending_payments(processors=processors)
 

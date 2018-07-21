@@ -41,5 +41,5 @@ setup(
         "Topic :: Software Development :: Libraries :: Application Frameworks",
     ],
     zip_safe=False,
-    extras_require={"stripe": ["stripe"]},
+    extras_require={"stripe": ["stripe>=2"]},
 )
