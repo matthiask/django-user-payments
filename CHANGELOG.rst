@@ -6,6 +6,10 @@ Change log
 `Next version`_
 ~~~~~~~~~~~~~~~
 
+
+`0.2`_ (2018-08-05)
+~~~~~~~~~~~~~~~~~~~
+
 - Changed ``SubscriptionPeriod.objects.create_line_items()`` to only
   create line items for periods that start no later than today by
   default. A new ``until`` keyword argument allows overriding this.
