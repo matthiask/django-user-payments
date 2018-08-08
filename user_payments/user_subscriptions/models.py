@@ -39,13 +39,11 @@ class SubscriptionManager(models.Manager):
         """
         with transaction.atomic():
             changed = False
-            created = False
 
             try:
                 subscription = self.get(user=user, code=code)
             except Subscription.DoesNotExist:
                 subscription = self.create(user=user, code=code, **kwargs)
-                created = True
             else:
                 for key, value in kwargs.items():
                     if getattr(subscription, key) != value:
@@ -56,19 +54,20 @@ class SubscriptionManager(models.Manager):
             if not changed:
                 return subscription
 
-            if not created:
-                subscription.delete_pending_periods()
+            subscription.delete_pending_periods()
 
             if subscription.paid_until > date.today():
                 try:
                     # Pending periods have been removed, only periods bound
                     # to paid-for payments left.
-                    period = subscription.periods.latest()
+                    period = subscription.periods.filter(
+                        starts_on__gte=date.today()
+                    ).latest()
                 except SubscriptionPeriod.DoesNotExist:
                     period = None
 
                 if period and "starts_on" not in kwargs:
-                    subscription.starts_on = period.starts_on
+                    subscription.starts_on = period.starts_on  # TODO never executed.
                 else:
                     # paid_until might already have been changed in the save()
                     # call above. So look at paid_untli and not at starts_on

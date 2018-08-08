@@ -420,6 +420,77 @@ class Test(TestCase):
         self.assertEqual(subscription.periodicity, "yearly")
         self.assertEqual(subscription.amount, 900)
 
+    def test_ensure_direct_change(self):
+        Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+        )
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="yearly",
+            amount=900,
+        )
+
+        self.assertEqual(subscription.starts_on, date.today())
+        self.assertEqual(subscription.periodicity, "yearly")
+        self.assertEqual(subscription.amount, 900)
+
+    def test_ensure_future(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date(2040, 1, 1),
+        )
+        self.assertEqual(subscription.paid_until, date(2039, 12, 31))
+
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="yearly",
+            amount=900,
+            starts_on=date(2040, 1, 1),
+        )
+
+        self.assertEqual(subscription.starts_on, date(2040, 1, 1))
+        self.assertEqual(subscription.periodicity, "yearly")
+
+    def test_ensure_past(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date(2000, 1, 1),
+        )
+
+        period = subscription.create_periods()[0]
+        period.create_line_item()
+        payment = Payment.objects.create_pending(user=self.user)
+        payment.charged_at = timezone.now()
+        payment.save()
+
+        Subscription.objects.update(paid_until=date(2040, 1, 1))
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="yearly",
+            amount=900,
+        )
+
+        self.assertEqual(subscription.starts_on, date(2040, 1, 2))
+        self.assertEqual(subscription.periodicity, "yearly")
+
     def test_update_paid_until(self):
         subscription = Subscription.objects.ensure(
             user=self.user,
