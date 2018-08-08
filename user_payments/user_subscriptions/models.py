@@ -42,8 +42,13 @@ class SubscriptionManager(models.Manager):
         )
         if not created:
             subscription.delete_pending_periods()
-        if subscription.paid_until > date.today():
-            subscription.starts_on = subscription.paid_until + timedelta(days=1)
+        if subscription.paid_until > date.today() and "starts_on" not in kwargs:
+            try:
+                period = subscription.periods.latest()
+            except SubscriptionPeriod.DoesNotExist:
+                subscription.starts_on = subscription.paid_until + timedelta(days=1)
+            else:
+                subscription.starts_on = period.starts_on
             subscription.save()
         return subscription
 
@@ -293,6 +298,7 @@ class SubscriptionPeriod(models.Model):
     objects = SubscriptionPeriodManager()
 
     class Meta:
+        get_latest_by = "starts_on"
         unique_together = (("subscription", "starts_on"),)
         verbose_name = _("subscription period")
         verbose_name_plural = _("subscription periods")

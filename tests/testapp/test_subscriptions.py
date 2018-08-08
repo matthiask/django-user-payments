@@ -331,6 +331,35 @@ class Test(TestCase):
         # starts_on is automatically moved after the paid_until value
         self.assertTrue(subscription.starts_on, paid_until + timedelta(days=1))
 
+    def test_ensure_twice(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+        )
+        period = subscription.create_periods()[0]
+        period.create_line_item()
+        payment = Payment.objects.create_pending(user=self.user)
+        payment.charged_at = timezone.now()
+        payment.save()
+
+        # And second request comes in...
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+        )
+
+        self.assertEqual(
+            list(subscription.create_periods(until=subscription.starts_on)), []
+        )
+        self.assertEqual(subscription.periods.count(), 1)
+        self.assertEqual(subscription.starts_on, date.today())
+
     def test_update_paid_until(self):
         subscription = Subscription.objects.ensure(
             user=self.user,

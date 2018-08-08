@@ -6,6 +6,10 @@ Change log
 `Next version`_
 ~~~~~~~~~~~~~~~
 
+- Fixed the case where two consecutive ``Subscription.objects.ensure()``
+  calls would lead to the subscription being restarted and a second
+  period being added right away.
+
 
 `0.2`_ (2018-08-05)
 ~~~~~~~~~~~~~~~~~~~
