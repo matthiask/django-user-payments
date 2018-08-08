@@ -3,9 +3,16 @@ from django.contrib import admin
 from . import models
 
 
+class LineItemInline(admin.TabularInline):
+    model = models.LineItem
+    raw_id_fields = ("user",)
+    extra = 0
+
+
 @admin.register(models.Payment)
 class PaymentAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
+    inlines = [LineItemInline]
     list_display = (
         "user",
         "created_at",

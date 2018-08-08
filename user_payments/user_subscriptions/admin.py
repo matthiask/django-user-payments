@@ -4,8 +4,15 @@ from user_payments.exceptions import UnknownPeriodicity
 from . import models
 
 
+class SubscriptionPeriodInline(admin.TabularInline):
+    model = models.SubscriptionPeriod
+    raw_id_fields = ("line_item",)
+    extra = 0
+
+
 @admin.register(models.Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
+    inlines = [SubscriptionPeriodInline]
     list_display = (
         "user",
         "title",

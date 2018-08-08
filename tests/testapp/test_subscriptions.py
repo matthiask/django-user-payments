@@ -9,6 +9,22 @@ from user_payments.models import LineItem, Payment
 from user_payments.user_subscriptions.models import Subscription, SubscriptionPeriod
 
 
+def zero_management_form_data(prefix):
+    return {
+        "%s-TOTAL_FORMS" % prefix: 0,
+        "%s-INITIAL_FORMS" % prefix: 0,
+        "%s-MIN_NUM_FORMS" % prefix: 0,
+        "%s-MAX_NUM_FORMS" % prefix: 1000,
+    }
+
+
+def merge_dicts(*dicts):
+    res = {}
+    for d in dicts:
+        res.update(d)
+    return res
+
+
 class Test(TestCase):
     def setUp(self):
         self.user = User.objects.create_superuser("admin", "admin@test.ch", "blabla")
@@ -194,16 +210,19 @@ class Test(TestCase):
         client = self.login()
         response = client.post(
             "/admin/user_subscriptions/subscription/add/",
-            {
-                "user": self.user.pk,
-                "code": "yay",
-                "title": "yay",
-                "starts_on": date.today().strftime("%Y-%m-%d"),
-                "periodicity": "yearly",
-                "amount": 10,
-                "created_at_0": date.today().strftime("%Y-%m-%d"),
-                "created_at_1": "12:00",
-            },
+            merge_dicts(
+                {
+                    "user": self.user.pk,
+                    "code": "yay",
+                    "title": "yay",
+                    "starts_on": date.today().strftime("%Y-%m-%d"),
+                    "periodicity": "yearly",
+                    "amount": 10,
+                    "created_at_0": date.today().strftime("%Y-%m-%d"),
+                    "created_at_1": "12:00",
+                },
+                zero_management_form_data("periods"),
+            ),
         )
         self.assertRedirects(response, "/admin/user_subscriptions/subscription/")
 
@@ -218,13 +237,16 @@ class Test(TestCase):
         client = self.login()
         response = client.post(
             "/admin/user_subscriptions/subscription/%s/change/" % subscription.pk,
-            {
-                "created_at_0": date.today().strftime("%Y-%m-%d"),
-                "created_at_1": "12:00",
-                "starts_on": date.today().strftime("%Y-%m-%d"),
-                "user": self.user.pk,
-                **values,
-            },
+            merge_dicts(
+                {
+                    "created_at_0": date.today().strftime("%Y-%m-%d"),
+                    "created_at_1": "12:00",
+                    "starts_on": date.today().strftime("%Y-%m-%d"),
+                    "user": self.user.pk,
+                    **values,
+                },
+                zero_management_form_data("periods"),
+            ),
         )
         self.assertRedirects(response, "/admin/user_subscriptions/subscription/")
 
@@ -353,16 +375,19 @@ class Test(TestCase):
         client = self.login()
         response = client.post(
             "/admin/user_subscriptions/subscription/add/",
-            {
-                "user": self.user.pk,
-                "code": "yay",
-                "title": "yay",
-                "starts_on": date.today().strftime("%Y-%m-%d"),
-                "periodicity": "manually",
-                "amount": 10,
-                "created_at_0": date.today().strftime("%Y-%m-%d"),
-                "created_at_1": "12:00",
-            },
+            merge_dicts(
+                {
+                    "user": self.user.pk,
+                    "code": "yay",
+                    "title": "yay",
+                    "starts_on": date.today().strftime("%Y-%m-%d"),
+                    "periodicity": "manually",
+                    "amount": 10,
+                    "created_at_0": date.today().strftime("%Y-%m-%d"),
+                    "created_at_1": "12:00",
+                },
+                zero_management_form_data("periods"),
+            ),
             follow=True,
         )
         # self.assertRedirects(response, "/admin/user_subscriptions/subscription/")
