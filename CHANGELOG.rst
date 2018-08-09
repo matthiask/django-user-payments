@@ -8,7 +8,8 @@ Change log
 
 - Fixed the case where two consecutive ``Subscription.objects.ensure()``
   calls would lead to the subscription being restarted and a second
-  period being added right away.
+  period being added right away. Also, fix a bunch of other edge cases
+  in ``ensure()`` and add a few additional tests while at it.
 
 
 `0.2`_ (2018-08-05)
