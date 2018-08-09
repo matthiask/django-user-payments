@@ -45,15 +45,17 @@ class SubscriptionManager(models.Manager):
             except Subscription.DoesNotExist:
                 subscription = self.create(user=user, code=code, **kwargs)
             else:
-                subscription.delete_pending_periods()
                 for key, value in kwargs.items():
                     if getattr(subscription, key) != value:
                         changed = True
                         setattr(subscription, key, value)
+
                 subscription.save()
 
                 if not changed:
                     return subscription
+
+            subscription.delete_pending_periods()
 
             if subscription.paid_until > date.today():
                 # paid_until might already have been changed in the save()
