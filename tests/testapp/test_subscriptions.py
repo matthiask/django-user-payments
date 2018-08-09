@@ -35,6 +35,12 @@ class Test(TestCase):
         client.force_login(self.user)
         return client
 
+    def pay_period(self, period, user=None):
+        period.create_line_item()
+        payment = Payment.objects.create_pending(user=user or self.user)
+        payment.charged_at = timezone.now()
+        payment.save()
+
     def test_model(self):
         subscription = Subscription.objects.create(
             user=self.user,
@@ -94,11 +100,7 @@ class Test(TestCase):
         self.assertTrue(subscription.is_active)
         self.assertTrue(subscription.in_grace_period)
 
-        period = subscription.create_periods()[-1]
-        period.create_line_item()
-        payment = Payment.objects.create_pending(user=self.user)
-        payment.charged_at = timezone.now()
-        payment.save()
+        self.pay_period(subscription.create_periods()[-1])
 
         subscription.refresh_from_db()
 
@@ -308,11 +310,7 @@ class Test(TestCase):
         self.assertEqual(subscription.periods.count(), 0)
 
         # Pay for a period...
-        period = subscription.create_periods()[-1]
-        period.create_line_item()
-        payment = Payment.objects.create_pending(user=self.user)
-        payment.charged_at = timezone.now()
-        payment.save()
+        self.pay_period(subscription.create_periods()[-1])
 
         subscription.refresh_from_db()
         paid_until = subscription.paid_until
@@ -339,11 +337,7 @@ class Test(TestCase):
             periodicity="monthly",
             amount=60,
         )
-        period = subscription.create_periods()[0]
-        period.create_line_item()
-        payment = Payment.objects.create_pending(user=self.user)
-        payment.charged_at = timezone.now()
-        payment.save()
+        self.pay_period(subscription.create_periods()[0])
 
         # And second request comes in...
         subscription = Subscription.objects.ensure(
@@ -370,10 +364,7 @@ class Test(TestCase):
             starts_on=date(2040, 1, 1),
         )
         period = subscription.create_periods(until=subscription.starts_on)[0]
-        period.create_line_item()
-        payment = Payment.objects.create_pending(user=self.user)
-        payment.charged_at = timezone.now()
-        payment.save()
+        self.pay_period(period)
 
         period.ends_on = date(2040, 1, 15)
         period.save()
@@ -395,10 +386,7 @@ class Test(TestCase):
 
         # Create the next period and pay for it...
         period = subscription.create_periods(until=subscription.starts_on)[0]
-        period.create_line_item()
-        payment = Payment.objects.create_pending(user=self.user)
-        payment.charged_at = timezone.now()
-        payment.save()
+        self.pay_period(period)
 
         period.ends_on = date(2040, 2, 15)
         period.save()
@@ -473,11 +461,7 @@ class Test(TestCase):
             starts_on=date(2000, 1, 1),
         )
 
-        period = subscription.create_periods()[0]
-        period.create_line_item()
-        payment = Payment.objects.create_pending(user=self.user)
-        payment.charged_at = timezone.now()
-        payment.save()
+        self.pay_period(subscription.create_periods()[0])
 
         Subscription.objects.update(paid_until=date(2040, 1, 1))
         subscription = Subscription.objects.ensure(
