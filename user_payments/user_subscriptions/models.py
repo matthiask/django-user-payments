@@ -45,33 +45,20 @@ class SubscriptionManager(models.Manager):
             except Subscription.DoesNotExist:
                 subscription = self.create(user=user, code=code, **kwargs)
             else:
+                subscription.delete_pending_periods()
                 for key, value in kwargs.items():
                     if getattr(subscription, key) != value:
                         changed = True
                         setattr(subscription, key, value)
                 subscription.save()
 
-            if not changed:
-                return subscription
-
-            subscription.delete_pending_periods()
+                if not changed:
+                    return subscription
 
             if subscription.paid_until > date.today():
-                try:
-                    # Pending periods have been removed, only periods bound
-                    # to paid-for payments left.
-                    period = subscription.periods.filter(
-                        starts_on__gte=date.today()
-                    ).latest()
-                except SubscriptionPeriod.DoesNotExist:
-                    period = None
-
-                if period and "starts_on" not in kwargs:
-                    subscription.starts_on = period.starts_on  # TODO never executed.
-                else:
-                    # paid_until might already have been changed in the save()
-                    # call above. So look at paid_untli and not at starts_on
-                    subscription.starts_on = subscription.paid_until + timedelta(days=1)
+                # paid_until might already have been changed in the save()
+                # call above. So look at paid_untli and not at starts_on
+                subscription.starts_on = subscription.paid_until + timedelta(days=1)
 
             subscription.save()
         return subscription
