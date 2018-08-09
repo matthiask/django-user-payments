@@ -314,7 +314,7 @@ class Test(TestCase):
 
         subscription.refresh_from_db()
         paid_until = subscription.paid_until
-        self.assertTrue(paid_until > date.today() + timedelta(days=10))
+        self.assertTrue(paid_until > date.today() + timedelta(days=25))
 
         subscription = Subscription.objects.ensure(
             user=self.user,
@@ -348,6 +348,8 @@ class Test(TestCase):
             amount=60,
         )
 
+        # Test that the second, equivalent request didn't move the start, and
+        # that -- for now -- only one period exists
         self.assertEqual(
             list(subscription.create_periods(until=subscription.starts_on)), []
         )
@@ -424,6 +426,8 @@ class Test(TestCase):
             amount=900,
         )
 
+        # Second one wins, but starting point is still today (as no periods
+        # were paid for)
         self.assertEqual(subscription.starts_on, date.today())
         self.assertEqual(subscription.periodicity, "yearly")
         self.assertEqual(subscription.amount, 900)
@@ -449,30 +453,6 @@ class Test(TestCase):
         )
 
         self.assertEqual(subscription.starts_on, date(2040, 1, 1))
-        self.assertEqual(subscription.periodicity, "yearly")
-
-    def test_ensure_past(self):
-        subscription = Subscription.objects.ensure(
-            user=self.user,
-            code="test1",
-            title="Test subscription 1",
-            periodicity="monthly",
-            amount=60,
-            starts_on=date(2000, 1, 1),
-        )
-
-        self.pay_period(subscription.create_periods()[0])
-
-        Subscription.objects.update(paid_until=date(2040, 1, 1))
-        subscription = Subscription.objects.ensure(
-            user=self.user,
-            code="test1",
-            title="Test subscription 1",
-            periodicity="yearly",
-            amount=900,
-        )
-
-        self.assertEqual(subscription.starts_on, date(2040, 1, 2))
         self.assertEqual(subscription.periodicity, "yearly")
 
     def test_update_paid_until(self):
