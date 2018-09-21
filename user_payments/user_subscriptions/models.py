@@ -251,6 +251,7 @@ class Subscription(models.Model):
                         continue
                     period.line_item.payment.cancel_pending()
                 period.line_item.delete()
+            # FIXME The period is already gone because of a cascading deletion
             period.delete()
 
     delete_pending_periods.alters_data = True
