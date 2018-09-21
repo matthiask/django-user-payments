@@ -29,6 +29,11 @@ class SubscriptionAdmin(admin.ModelAdmin):
     raw_id_fields = ("user",)
     search_fields = ("title",)
 
+    def get_inline_instances(self, request, obj=None):
+        if obj is None:
+            return []
+        return super().get_inline_instances(request, obj=obj)
+
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         if not change:

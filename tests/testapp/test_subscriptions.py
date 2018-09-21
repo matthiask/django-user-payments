@@ -510,7 +510,6 @@ class Test(TestCase):
                     "created_at_0": date.today().strftime("%Y-%m-%d"),
                     "created_at_1": "12:00",
                 },
-                zero_management_form_data("periods"),
             ),
             follow=True,
         )

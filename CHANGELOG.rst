@@ -12,6 +12,8 @@ Change log
   in ``ensure()`` and add a few additional tests while at it.
 - Made it impossible to inadvertently delete subscription periods by
   cascading deletions when removing line items.
+- Changed the subscription admin to only show the period inline when
+  updating a subscription.
 
 
 `0.2`_ (2018-08-05)
