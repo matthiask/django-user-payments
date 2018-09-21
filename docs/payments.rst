@@ -89,3 +89,13 @@ in most cases not very useful anymore. Deleting the instance directly
 fails because the line items' ``payment`` foreign key protects against
 cascading deletion. Instead, ``payment.cancel_pending()`` unbinds the
 line items from the payment and deletes the payment instance.
+
+
+Undoing payments
+~~~~~~~~~~~~~~~~
+
+In rare cases it may even be necessary to undo a payment which has
+already been marked as paid, respectively has its ``charged_at`` field
+set to a truthy value. In this case, the ``payment.undo()`` method sets
+``charged_at`` back to ``None`` and unbinds all the payments' line
+items.

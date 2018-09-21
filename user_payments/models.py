@@ -63,14 +63,14 @@ class Payment(AbstractPayment):
 
     cancel_pending.alters_data = True
 
-    def undo_payment(self):
+    def undo(self):
         assert self.charged_at
         self.charged_at = None
         self.save()
         # Unbind line items after post_save signal handling
         self.lineitems.update(payment=None)
 
-    undo_payment.alters_data = True
+    undo.alters_data = True
 
     @property
     def description(self):

@@ -539,7 +539,7 @@ class Test(TestCase):
         self.assertEqual(subscription.paid_until, date(2018, 1, 31))
 
         payment = Payment.objects.get()
-        payment.undo_payment()
+        payment.undo()
 
         subscription.refresh_from_db()
         self.assertEqual(subscription.paid_until, date(2017, 12, 31))

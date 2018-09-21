@@ -14,6 +14,10 @@ Change log
   cascading deletions when removing line items.
 - Changed the subscription admin to only show the period inline when
   updating a subscription.
+- Added ``Payment.undo()`` to undo payments which have already been
+  marked as paid.
+- Fixed an edge case where setting ``Subscription.paid_until`` would
+  produce incorrect results when no period was paid for yet.
 
 
 `0.2`_ (2018-08-05)
