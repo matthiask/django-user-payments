@@ -1,5 +1,4 @@
 from datetime import date, timedelta
-import unittest
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -523,7 +522,6 @@ class Test(TestCase):
         self.assertEqual(subscription.periods.count(), 0)
         self.assertEqual(len(subscription.create_periods(until=date(2018, 4, 1))), 0)
 
-    @unittest.expectedFailure
     def test_banktransfer_failed(self):
         subscription = Subscription.objects.ensure(
             user=self.user,
@@ -534,7 +532,16 @@ class Test(TestCase):
             starts_on=date(2018, 1, 1),
         )
         period, = subscription.create_periods(until=subscription.starts_on)
+        self.assertEqual(subscription.paid_until, date(2017, 12, 31))
+
         self.pay_period(period)
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.paid_until, date(2018, 1, 31))
 
         payment = Payment.objects.get()
-        payment.delete()  # Fails, but there should be a way to do this.
+        payment.undo_payment()
+
+        subscription.refresh_from_db()
+        self.assertEqual(subscription.paid_until, date(2017, 12, 31))
+
+        self.assertEqual(payment.lineitems.count(), 0)

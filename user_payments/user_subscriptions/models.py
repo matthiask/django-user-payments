@@ -164,9 +164,7 @@ class Subscription(models.Model):
     save.alters_data = True
 
     def update_paid_until(self, save=True):
-        self.paid_until = (
-            self.periods.paid().aggregate(m=Max("ends_on"))["m"] or self.paid_until
-        )
+        self.paid_until = self.periods.paid().aggregate(m=Max("ends_on"))["m"]
         if save:
             self.save()
 
