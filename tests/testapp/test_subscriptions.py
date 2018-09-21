@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+import unittest
 
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
@@ -481,20 +482,6 @@ class Test(TestCase):
         subscription.refresh_from_db()
         self.assertEqual(subscription.paid_until, date(2018, 1, 31))
 
-    def test_cancel(self):
-        subscription = Subscription.objects.ensure(
-            user=self.user,
-            code="test1",
-            title="Test subscription 1",
-            periodicity="monthly",
-            amount=60,
-            starts_on=date(2018, 1, 1),
-        )
-        self.assertEqual(len(subscription.create_periods(until=date(2018, 4, 1))), 4)
-        subscription.cancel()
-        self.assertEqual(subscription.periods.count(), 0)
-        self.assertEqual(len(subscription.create_periods(until=date(2018, 4, 1))), 0)
-
     def test_admin_create_manual_periodicity(self):
         client = self.login()
         response = client.post(
@@ -521,3 +508,33 @@ class Test(TestCase):
 
         self.assertEqual(Subscription.objects.count(), 1)
         self.assertEqual(SubscriptionPeriod.objects.count(), 0)
+
+    def test_cancel(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date(2018, 1, 1),
+        )
+        self.assertEqual(len(subscription.create_periods(until=date(2018, 4, 1))), 4)
+        subscription.cancel()
+        self.assertEqual(subscription.periods.count(), 0)
+        self.assertEqual(len(subscription.create_periods(until=date(2018, 4, 1))), 0)
+
+    @unittest.expectedFailure
+    def test_banktransfer_failed(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date(2018, 1, 1),
+        )
+        period, = subscription.create_periods(until=subscription.starts_on)
+        self.pay_period(period)
+
+        payment = Payment.objects.get()
+        payment.delete()  # Fails, but there should be a way to do this.
