@@ -245,14 +245,15 @@ class Subscription(models.Model):
 
     def delete_pending_periods(self):
         for period in self.periods.select_related("line_item__payment"):
-            if period.line_item:
-                if period.line_item.payment:
-                    if period.line_item.payment.charged_at:
+            line_item = period.line_item
+            if line_item:
+                if line_item.payment:
+                    if line_item.payment.charged_at:
                         continue
-                    period.line_item.payment.cancel_pending()
-                period.line_item.delete()
-            # FIXME The period is already gone because of a cascading deletion
+                    line_item.payment.cancel_pending()
             period.delete()
+            if line_item:
+                line_item.delete()
 
     delete_pending_periods.alters_data = True
 
@@ -303,7 +304,7 @@ class SubscriptionPeriod(models.Model):
     ends_on = models.DateField(_("ends on"))
     line_item = models.OneToOneField(
         LineItem,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         blank=True,
         null=True,
         verbose_name=_("line item"),

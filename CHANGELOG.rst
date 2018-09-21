@@ -10,6 +10,8 @@ Change log
   calls would lead to the subscription being restarted and a second
   period being added right away. Also, fix a bunch of other edge cases
   in ``ensure()`` and add a few additional tests while at it.
+- Made it impossible to inadvertently delete subscription periods by
+  cascading deletions when removing line items.
 
 
 `0.2`_ (2018-08-05)

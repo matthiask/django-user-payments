@@ -108,7 +108,7 @@ class Migration(migrations.Migration):
                     models.OneToOneField(
                         blank=True,
                         null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
+                        on_delete=django.db.models.deletion.PROTECT,
                         to="user_payments.LineItem",
                         verbose_name="line item",
                     ),
