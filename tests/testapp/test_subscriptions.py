@@ -496,7 +496,7 @@ class Test(TestCase):
                     "amount": 10,
                     "created_at_0": date.today().strftime("%Y-%m-%d"),
                     "created_at_1": "12:00",
-                },
+                }
             ),
             follow=True,
         )
