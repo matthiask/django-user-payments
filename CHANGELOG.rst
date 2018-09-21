@@ -6,6 +6,9 @@ Change log
 `Next version`_
 ~~~~~~~~~~~~~~~
 
+`0.3`_ (2018-09-21)
+~~~~~~~~~~~~~~~~~~~
+
 - Fixed the case where two consecutive ``Subscription.objects.ensure()``
   calls would lead to the subscription being restarted and a second
   period being added right away. Also, fix a bunch of other edge cases
@@ -41,4 +44,5 @@ Change log
 
 .. _0.1: https://github.com/matthiask/django-user-payments/commit/c6dc9474
 .. _0.2: https://github.com/matthiask/django-user-payments/compare/0.1...0.2
-.. _Next version: https://github.com/matthiask/django-user-payments/compare/0.2...master
+.. _0.3: https://github.com/matthiask/django-user-payments/compare/0.2...0.3
+.. _Next version: https://github.com/matthiask/django-user-payments/compare/0.3...master
