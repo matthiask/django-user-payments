@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 
 from user_payments.exceptions import UnknownPeriodicity
 from . import models
@@ -24,10 +25,14 @@ class SubscriptionAdmin(admin.ModelAdmin):
         "paid_until",
         "renew_automatically",
     )
-    list_filter = ("renew_automatically",)
+    list_filter = ("renew_automatically", "code")
     radio_fields = {"periodicity": admin.HORIZONTAL}
     raw_id_fields = ("user",)
-    search_fields = ("title",)
+    search_fields = (
+        "title",
+        "code",
+        "user__{}".format(get_user_model().USERNAME_FIELD),
+    )
 
     def get_inline_instances(self, request, obj=None):
         if obj is None:
@@ -47,3 +52,6 @@ class SubscriptionAdmin(admin.ModelAdmin):
 class SubscriptionPeriodAdmin(admin.ModelAdmin):
     list_display = ("subscription", "starts_on", "ends_on", "line_item")
     raw_id_fields = ("subscription", "line_item")
+    search_fields = [
+        "subscription__{}".format(field) for field in SubscriptionAdmin.search_fields
+    ]

@@ -6,6 +6,10 @@ Change log
 `Next version`_
 ~~~~~~~~~~~~~~~
 
+- Ensured that the username is part of ``search_fields`` for all models
+  registered with the admin interface.
+
+
 `0.3`_ (2018-09-21)
 ~~~~~~~~~~~~~~~~~~~
 
