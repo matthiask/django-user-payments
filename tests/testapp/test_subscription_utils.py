@@ -34,6 +34,17 @@ class Test(TestCase):
         )
 
         self.assertEqual(
+            list(islice(recurring(date(2016, 1, 31), "quarterly"), 5)),
+            [
+                date(2016, 1, 31),
+                date(2016, 5, 1),
+                date(2016, 7, 31),
+                date(2016, 10, 31),
+                date(2017, 1, 31),
+            ],
+        )
+
+        self.assertEqual(
             list(islice(recurring(date(2016, 1, 31), "monthly"), 5)),
             [
                 date(2016, 1, 31),

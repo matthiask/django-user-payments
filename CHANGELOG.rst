@@ -8,6 +8,7 @@ Change log
 
 - Ensured that the username is part of ``search_fields`` for all models
   registered with the admin interface.
+- Added a new subscription periodicity, ``quarterly``.
 
 
 `0.3`_ (2018-09-21)

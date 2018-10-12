@@ -41,6 +41,12 @@ def recurring(start, periodicity):
             for i in itertools.count()
         )
 
+    elif periodicity == "quarterly":
+        return (  # pragma: no branch
+            next_valid_day(start.year, start.month + i * 3, start.day)
+            for i in itertools.count()
+        )
+
     elif periodicity == "monthly":
         return (  # pragma: no branch
             next_valid_day(start.year, start.month + i, start.day)

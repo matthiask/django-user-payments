@@ -127,6 +127,7 @@ class Subscription(models.Model):
         max_length=20,
         choices=[
             ("yearly", _("yearly")),
+            ("quarterly", _("quarterly")),
             ("monthly", _("monthly")),
             ("weekly", _("weekly")),
             ("manually", _("manually")),

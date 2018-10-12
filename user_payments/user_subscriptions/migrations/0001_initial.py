@@ -53,6 +53,7 @@ class Migration(migrations.Migration):
                     models.CharField(
                         choices=[
                             ("yearly", "yearly"),
+                            ("quarterly", "quarterly"),
                             ("monthly", "monthly"),
                             ("weekly", "weekly"),
                             ("manually", "manually"),
