@@ -59,7 +59,7 @@ class SubscriptionManager(models.Manager):
 
             if subscription.paid_until > date.today():
                 # paid_until might already have been changed in the save()
-                # call above. So look at paid_untli and not at starts_on
+                # call above. So look at paid_until and not at starts_on
                 subscription.starts_on = subscription.paid_until + timedelta(days=1)
 
             subscription.save()
