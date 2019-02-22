@@ -565,7 +565,7 @@ class Test(TestCase):
         self.assertEqual(payment.amount, 780)
         payment.cancel_pending()
 
-        SubscriptionPeriod.objects.nullify_pending_periods(lasting_until=today)
+        SubscriptionPeriod.objects.zeroize_pending_periods(lasting_until=today)
 
         payment = Payment.objects.create_pending(user=self.user)
         self.assertEqual(payment.amount, 60)

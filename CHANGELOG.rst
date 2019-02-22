@@ -9,6 +9,10 @@ Change log
 - Ensured that the username is part of ``search_fields`` for all models
   registered with the admin interface.
 - Added a new subscription periodicity, ``quarterly``.
+- Added a ``SubscriptionPeriod.objects.zeroize_pending_periods()``
+  helper for zeroizing past periods so that when users (finally) provide
+  payment methods they do not have to pay past periods too (if you
+  choose so).
 
 
 `0.3`_ (2018-09-21)

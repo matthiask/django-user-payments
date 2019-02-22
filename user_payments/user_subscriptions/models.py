@@ -291,7 +291,7 @@ class SubscriptionPeriodManager(models.Manager):
         ):
             period.create_line_item()
 
-    def nullify_pending_periods(self, *, lasting_until=None):
+    def zeroize_pending_periods(self, *, lasting_until=None):
         LineItem.objects.filter(
             id__in=self.filter(
                 ~Q(id__in=self.paid()), Q(ends_on__lt=lasting_until or date.today())
