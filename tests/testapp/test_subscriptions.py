@@ -1,7 +1,6 @@
 from datetime import date, timedelta
 
 from django.contrib.auth.models import User
-from django.db.models import Q
 from django.test import Client, TestCase
 from django.utils import timezone
 from django.utils.translation import deactivate_all
@@ -566,11 +565,7 @@ class Test(TestCase):
         self.assertEqual(payment.amount, 780)
         payment.cancel_pending()
 
-        LineItem.objects.filter(
-            id__in=subscription.periods.filter(
-                ~Q(id__in=subscription.periods.paid()), Q(ends_on__lt=today)
-            ).values("line_item")
-        ).update(amount=0)
+        SubscriptionPeriod.objects.nullify_pending_periods(lasting_until=today)
 
         payment = Payment.objects.create_pending(user=self.user)
         self.assertEqual(payment.amount, 60)

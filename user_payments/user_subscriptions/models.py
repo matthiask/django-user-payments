@@ -3,7 +3,7 @@ from datetime import date, datetime, time, timedelta
 from django.apps import apps
 from django.conf import settings
 from django.db import models, transaction
-from django.db.models import Max, signals
+from django.db.models import Max, Q, signals
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -290,6 +290,13 @@ class SubscriptionPeriodManager(models.Manager):
             line_item__isnull=True, starts_on__lte=until or date.today()
         ):
             period.create_line_item()
+
+    def nullify_pending_periods(self, *, lasting_until=None):
+        LineItem.objects.filter(
+            id__in=self.filter(
+                ~Q(id__in=self.paid()), Q(ends_on__lt=lasting_until or date.today())
+            ).values("line_item")
+        ).update(amount=0)
 
 
 class SubscriptionPeriod(models.Model):
