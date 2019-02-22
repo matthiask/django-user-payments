@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.test import Client, TestCase
 from django.utils import timezone
 from django.utils.translation import deactivate_all
@@ -545,3 +546,31 @@ class Test(TestCase):
         self.assertEqual(subscription.paid_until, date(2017, 12, 31))
 
         self.assertEqual(payment.lineitems.count(), 0)
+
+    def test_create_subscription_start_paying_later(self):
+        subscription = Subscription.objects.ensure(
+            user=self.user,
+            code="test1",
+            title="Test subscription 1",
+            periodicity="monthly",
+            amount=60,
+            starts_on=date(2018, 1, 1),
+        )
+        today = date(2019, 1, 15)
+        subscription.create_periods(until=today)
+        self.assertEqual(subscription.paid_until, date(2017, 12, 31))
+
+        SubscriptionPeriod.objects.create_line_items()
+
+        payment = Payment.objects.create_pending(user=self.user)
+        self.assertEqual(payment.amount, 780)
+        payment.cancel_pending()
+
+        LineItem.objects.filter(
+            id__in=subscription.periods.filter(
+                ~Q(id__in=subscription.periods.paid()), Q(ends_on__lt=today)
+            ).values("line_item")
+        ).update(amount=0)
+
+        payment = Payment.objects.create_pending(user=self.user)
+        self.assertEqual(payment.amount, 60)
