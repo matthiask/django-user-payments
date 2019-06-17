@@ -1,3 +1,4 @@
+import hashlib
 import json
 
 from django.conf import settings
@@ -15,22 +16,33 @@ class CustomerManager(models.Manager):
         """
 
         try:
-            customer_id = user.stripe_customer.customer_id
+            user.stripe_customer
         except Customer.DoesNotExist:
-            obj = stripe.Customer.create(
-                email=user.email, source=token, expand=["default_source"]
-            )
-            customer = self.model(user=user, customer_id=obj.id)
-            customer.customer = obj
-            customer.save()
-            return customer
-
+            return self._create_with_token(user, token)
         else:
-            obj = stripe.Customer.retrieve(customer_id)
-            obj.source = token
-            obj.save()
-            user.stripe_customer.refresh()
-            return user.stripe_customer
+            return self._update_token(user, token)
+
+    def _create_with_token(self, user, token):
+        obj = stripe.Customer.create(
+            email=user.email,
+            source=token,
+            expand=["default_source"],
+            idempotency_key="create-with-token-%s"
+            % (hashlib.sha1(token.encode("utf-8")).hexdigest(),),
+        )
+        customer, created = self.update_or_create(
+            user=user,
+            defaults={"customer_id": obj.id, "customer_data": json.dumps(obj)},
+        )
+        customer._customer_data_cache = obj
+        return customer
+
+    def _update_token(self, user, token):
+        obj = stripe.Customer.retrieve(user.stripe_customer.customer_id)
+        obj.source = token
+        obj.save()
+        user.stripe_customer.refresh()
+        return user.stripe_customer
 
 
 class Customer(models.Model):
