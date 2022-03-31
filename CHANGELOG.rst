@@ -14,6 +14,7 @@ Change log
   payment methods they do not have to pay past periods too (if you
   choose so).
 - Started applying pre-commit to the project.
+- From Travis CI to GitHub actions.
 
 
 `0.3`_ (2018-09-21)
