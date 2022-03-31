@@ -152,7 +152,7 @@ class Test(TestCase):
         )
 
         # Exactly one period
-        period, = subscription.create_periods(until=subscription.starts_on)
+        (period,) = subscription.create_periods(until=subscription.starts_on)
         self.assertEqual(LineItem.objects.count(), 0)
         period.create_line_item()
         self.assertEqual(LineItem.objects.count(), 1)
@@ -531,7 +531,7 @@ class Test(TestCase):
             amount=60,
             starts_on=date(2018, 1, 1),
         )
-        period, = subscription.create_periods(until=subscription.starts_on)
+        (period,) = subscription.create_periods(until=subscription.starts_on)
         self.assertEqual(subscription.paid_until, date(2017, 12, 31))
 
         self.pay_period(period)

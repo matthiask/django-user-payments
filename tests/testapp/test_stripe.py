@@ -2,12 +2,12 @@ import json
 import os
 from unittest import mock
 
+import stripe
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 from django.utils.translation import deactivate_all
 
-import stripe
 from user_payments.stripe_customers.models import Customer
 
 

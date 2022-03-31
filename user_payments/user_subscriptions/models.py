@@ -325,7 +325,7 @@ class SubscriptionPeriod(models.Model):
         verbose_name_plural = _("subscription periods")
 
     def __str__(self):
-        return "%s (%s - %s)" % (self.subscription, self.starts_on, self.ends_on)
+        return f"{self.subscription} ({self.starts_on} - {self.ends_on})"
 
     def create_line_item(self):
         """

@@ -1,24 +1,23 @@
 from datetime import timedelta
 from unittest import mock
 
+import stripe
 from django.contrib.auth.models import User
 from django.core import mail
 from django.test import TestCase
 from django.utils import timezone
 from django.utils.translation import deactivate_all
+from testapp.processing import processors
 
-import stripe
 from user_payments.models import LineItem, Payment
 from user_payments.processing import (
     Result,
     ResultError,
     process_payment,
-    process_unbound_items,
     process_pending_payments,
+    process_unbound_items,
 )
 from user_payments.stripe_customers.models import Customer
-
-from testapp.processing import processors
 
 
 class Test(TestCase):

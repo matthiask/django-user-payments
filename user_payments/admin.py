@@ -27,7 +27,7 @@ class PaymentAdmin(admin.ModelAdmin):
     search_fields = (
         "email",
         "transaction",
-        "user__{}".format(get_user_model().USERNAME_FIELD),
+        f"user__{get_user_model().USERNAME_FIELD}",
     )
 
 
@@ -36,4 +36,4 @@ class LineItemAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
     list_display = ("user", "payment", "created_at", "title", "amount")
     raw_id_fields = ("user", "payment")
-    search_fields = ("title", "user__{}".format(get_user_model().USERNAME_FIELD))
+    search_fields = ("title", f"user__{get_user_model().USERNAME_FIELD}")

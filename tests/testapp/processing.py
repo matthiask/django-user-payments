@@ -1,12 +1,11 @@
 import json
 import logging
 
+import stripe
 from django.apps import apps
 from django.core.mail import EmailMessage
 from django.db.models import ObjectDoesNotExist
 from django.utils import timezone
-
-import stripe
 from mooch.signals import post_charge
 
 from user_payments.processing import Result
@@ -32,7 +31,7 @@ def with_stripe_customer(payment):
             amount=payment.amount_cents,
             currency=s.currency,
             description=payment.description,
-            idempotency_key="charge-%s-%s" % (payment.id.hex, payment.amount_cents),
+            idempotency_key=f"charge-{payment.id.hex}-{payment.amount_cents}",
         )
 
     except stripe.error.CardError as exc:

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import os
-from io import open
 
 from setuptools import find_packages, setup
 

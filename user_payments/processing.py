@@ -67,7 +67,7 @@ def process_payment(payment, *, processors, cancel_on_failure=True):
 
             else:
                 raise ResultError(
-                    "Invalid result %r from %s" % (result, processor.__name__)
+                    f"Invalid result {result!r} from {processor.__name__}"
                 )
 
         else:

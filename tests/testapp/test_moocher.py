@@ -1,14 +1,13 @@
 from unittest import mock
 
+import stripe
 from django.contrib.auth.models import AnonymousUser, User
 from django.test import RequestFactory, TestCase
 from django.utils.translation import deactivate_all
+from testapp.moochers import moochers
 
-import stripe
 from user_payments.models import Payment
 from user_payments.stripe_customers.models import Customer
-
-from testapp.moochers import moochers
 
 
 class AttrDict(dict):

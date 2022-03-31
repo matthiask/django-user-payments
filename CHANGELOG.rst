@@ -13,6 +13,7 @@ Change log
   helper for zeroizing past periods so that when users (finally) provide
   payment methods they do not have to pay past periods too (if you
   choose so).
+- Started applying pre-commit to the project.
 
 
 `0.3`_ (2018-09-21)

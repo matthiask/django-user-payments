@@ -3,7 +3,6 @@ from django.db import models, transaction
 from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy as _
-
 from mooch.models import Payment as AbstractPayment
 
 
@@ -74,7 +73,7 @@ class Payment(AbstractPayment):
 
     @property
     def description(self):
-        return "Payment of %s by %s: %s" % (
+        return "Payment of {} by {}: {}".format(
             self.amount,
             self.email,
             ", ".join(str(item) for item in self.lineitems.all()),

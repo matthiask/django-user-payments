@@ -3,13 +3,13 @@ import re
 
 from django.contrib import admin
 from django.utils.html import format_html
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from . import models
 
 
 def sanitize_value(matchobj):
-    return "%s%s" % (matchobj.group(1), "*" * len(matchobj.group(3)))
+    return "{}{}".format(matchobj.group(1), "*" * len(matchobj.group(3)))
 
 
 def sanitize(data, *, key=None):

@@ -1,12 +1,11 @@
 import hashlib
 import json
 
+import stripe
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
-
-import stripe
+from django.utils.translation import gettext_lazy as _
 
 
 class CustomerManager(models.Manager):
@@ -64,7 +63,7 @@ class Customer(models.Model):
         verbose_name_plural = _("customers")
 
     def __str__(self):
-        return "%s%s" % (self.customer_id[:10], "*" * (len(self.customer_id) - 10))
+        return "{}{}".format(self.customer_id[:10], "*" * (len(self.customer_id) - 10))
 
     def save(self, *args, **kwargs):
         if hasattr(self, "_customer_data_cache"):
